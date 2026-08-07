@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   update:
@@ -107,3 +109,35 @@ jobs:
             git commit -m "chore: dashboard update ($(date -u +%Y-%m-%d))"
             git push
           fi
+
+  deploy-pages:
+    needs: update
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout (aktuellster Stand nach dem Update-Job)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Pages-Ordner vorbereiten (nur das verschluesselte index.html)
+        run: |
+          mkdir -p _site
+          cp dashboard/index.html _site/index.html
+
+      - name: GitHub Pages konfigurieren
+        uses: actions/configure-pages@v5
+
+      - name: Artefakt hochladen
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy nach GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
