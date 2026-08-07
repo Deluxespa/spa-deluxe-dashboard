@@ -74,5 +74,4 @@ SECRET_GROUPS = {
     ],
     "Anthropic (KI-Jobs)": ["ANTHROPIC_API_KEY"],
     "Dashboard-Verschlüsselung": ["DASHBOARD_PASSWORD"],
-    "GitHub Pages Deploy": ["DASHBOARD_REPO", "GH_PAGES_TOKEN"],
 }

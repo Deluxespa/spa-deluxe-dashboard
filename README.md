@@ -78,7 +78,6 @@ setzen, in GitHub Actions als **Repository Secrets** unter
 | Sistrix | `SISTRIX_API_KEY`, `SISTRIX_DOMAIN` |
 | Notion | `NOTION_TOKEN`, `NOTION_DB_WEEKLY_NUMBERS`, `NOTION_DB_TASKS`, `NOTION_DB_LEARNINGS`, `NOTION_DB_CONTENT_PLAN`, `NOTION_DB_ANOMALIES` |
 | Anthropic (KI-Jobs) | `ANTHROPIC_API_KEY` |
-| GitHub Pages Deploy | `DASHBOARD_REPO` (Format `owner/repo`), `GH_PAGES_TOKEN` (PAT mit `repo`-Scope) |
 
 Jeder Getter in `lib/config.py` gibt `None` zurück, wenn ein Secret fehlt –
 kein Crash. Jobs überspringen die jeweilige Integration dann einfach
@@ -95,10 +94,8 @@ Actions-Tab gestartet werden. Ablauf:
 2. `jobs/weekly_numbers_update.py` ausführen → `dashboard/index.html` neu
    erzeugen
 3. Falls sich das Dashboard geändert hat: automatisch committen & pushen
-4. Falls `DASHBOARD_REPO` + `GH_PAGES_TOKEN` gesetzt sind: das neue
-   `index.html` zusätzlich in ein separates GitHub-Pages-Repo kopieren und
-   dort pushen (praktisch, wenn das Automatisierungs-Repo privat bleiben,
-   aber das Dashboard öffentlich über GitHub Pages erreichbar sein soll)
+4. `deploy-pages`-Job: baut daraus direkt die GitHub-Pages-Seite (nativer
+   `actions/deploy-pages`, kein externes Ziel-Repo nötig)
 
 ## Auf einen neuen GitHub bringen
 
@@ -114,13 +111,12 @@ git push -u origin main
 Danach im neuen Repo unter *Settings → Secrets and variables → Actions* die
 Secrets aus der Tabelle oben eintragen (mindestens `DASHBOARD_PASSWORD`).
 
-Für GitHub Pages: entweder das Repo selbst public machen und Pages auf
-`main` / `dashboard/` zeigen lassen, **oder** (empfohlen, wenn das
-Automatisierungs-Repo mit Code/CI privat bleiben soll) ein zweites, leeres
-Repo anlegen, dessen Pages aktiviert sind, und `DASHBOARD_REPO` +
-`GH_PAGES_TOKEN` (Personal Access Token mit `repo`-Scope) als Secrets im
-Automatisierungs-Repo setzen – der Workflow kopiert `index.html` dann
-automatisch dorthin.
+Für GitHub Pages: Der `deploy-pages`-Job im Workflow nutzt die native
+GitHub-Pages-Integration (`actions/configure-pages` +
+`actions/deploy-pages`) direkt auf diesem Repo. Es wird kein zweites Repo
+und kein zusätzliches Personal Access Token benötigt – lediglich unter
+*Settings → Pages → Build and deployment* die Quelle auf "GitHub Actions"
+stellen (einmalig).
 
 ## Legacy-Skripte
 

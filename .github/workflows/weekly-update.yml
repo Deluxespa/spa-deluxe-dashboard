@@ -49,8 +49,6 @@ jobs:
           NOTION_DB_ANOMALIES: ${{ secrets.NOTION_DB_ANOMALIES }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           DASHBOARD_PASSWORD: ${{ secrets.DASHBOARD_PASSWORD }}
-          DASHBOARD_REPO: ${{ secrets.DASHBOARD_REPO }}
-          GH_PAGES_TOKEN: ${{ secrets.GH_PAGES_TOKEN }}
         run: python3 jobs/api_smoke_test.py || true
 
       - name: Dashboard-Daten aktualisieren & Dashboard neu bauen
@@ -87,26 +85,6 @@ jobs:
             echo "Keine Aenderungen am Dashboard."
           else
             git commit -m "chore: weekly dashboard update ($(date -u +%Y-%m-%d))"
-            git push
-          fi
-
-      - name: Auf Ziel-Repo (GitHub Pages) deployen
-        if: ${{ env.DASHBOARD_REPO != '' && env.GH_PAGES_TOKEN != '' }}
-        env:
-          DASHBOARD_REPO: ${{ secrets.DASHBOARD_REPO }}
-          GH_PAGES_TOKEN: ${{ secrets.GH_PAGES_TOKEN }}
-        run: |
-          rm -rf /tmp/pages-deploy
-          git clone "https://x-access-token:${GH_PAGES_TOKEN}@github.com/${DASHBOARD_REPO}.git" /tmp/pages-deploy
-          cp dashboard/index.html /tmp/pages-deploy/index.html
-          cd /tmp/pages-deploy
-          git config user.name "spa-deluxe-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add index.html
-          if git diff --cached --quiet; then
-            echo "Pages-Repo bereits aktuell."
-          else
-            git commit -m "chore: dashboard update ($(date -u +%Y-%m-%d))"
             git push
           fi
 
