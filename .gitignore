@@ -1,0 +1,23 @@
+# Secrets / lokale Konfiguration
+.env
+*.env.local
+
+# Sensible Roh- und Cache-Daten (Kundennamen, PLZ, Beträge, Umsätze) – NIEMALS committen.
+# Alles hier wird von jobs/weekly_numbers_update.py reproduzierbar neu erzeugt.
+data/raw/
+data/cache/
+
+# Lokale Klartext-Vorschau des Dashboards (unverschlüsselt!)
+dashboard/_local_preview.html
+
+# Das rohe, entschlüsselte Referenz-HTML der Vorlage (enthält fremde Beispieldaten)
+dashboard/reference_original.html
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store

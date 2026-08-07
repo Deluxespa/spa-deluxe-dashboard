@@ -1,0 +1,109 @@
+name: Weekly Dashboard Update
+
+on:
+  schedule:
+    # Jeden Montag 05:00 UTC (= 06:00/07:00 Berlin, je nach Sommer-/Winterzeit)
+    - cron: "0 5 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Dependencies installieren
+        run: pip install -r requirements.txt
+
+      - name: Secrets-Check (nur informativ, bricht den Job nicht ab)
+        env:
+          HUBSPOT_PRIVATE_APP_TOKEN: ${{ secrets.HUBSPOT_PRIVATE_APP_TOKEN }}
+          GOOGLE_ADS_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_ADS_DEVELOPER_TOKEN }}
+          GOOGLE_ADS_CLIENT_ID: ${{ secrets.GOOGLE_ADS_CLIENT_ID }}
+          GOOGLE_ADS_CLIENT_SECRET: ${{ secrets.GOOGLE_ADS_CLIENT_SECRET }}
+          GOOGLE_ADS_REFRESH_TOKEN: ${{ secrets.GOOGLE_ADS_REFRESH_TOKEN }}
+          GOOGLE_ADS_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_CUSTOMER_ID }}
+          GOOGLE_ADS_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_LOGIN_CUSTOMER_ID }}
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+          META_AD_ACCOUNT_ID: ${{ secrets.META_AD_ACCOUNT_ID }}
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+          SISTRIX_API_KEY: ${{ secrets.SISTRIX_API_KEY }}
+          SISTRIX_DOMAIN: ${{ secrets.SISTRIX_DOMAIN }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DB_WEEKLY_NUMBERS: ${{ secrets.NOTION_DB_WEEKLY_NUMBERS }}
+          NOTION_DB_TASKS: ${{ secrets.NOTION_DB_TASKS }}
+          NOTION_DB_LEARNINGS: ${{ secrets.NOTION_DB_LEARNINGS }}
+          NOTION_DB_CONTENT_PLAN: ${{ secrets.NOTION_DB_CONTENT_PLAN }}
+          NOTION_DB_ANOMALIES: ${{ secrets.NOTION_DB_ANOMALIES }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DASHBOARD_PASSWORD: ${{ secrets.DASHBOARD_PASSWORD }}
+          DASHBOARD_REPO: ${{ secrets.DASHBOARD_REPO }}
+          GH_PAGES_TOKEN: ${{ secrets.GH_PAGES_TOKEN }}
+        run: python3 jobs/api_smoke_test.py || true
+
+      - name: Dashboard-Daten aktualisieren & Dashboard neu bauen
+        env:
+          HUBSPOT_PRIVATE_APP_TOKEN: ${{ secrets.HUBSPOT_PRIVATE_APP_TOKEN }}
+          GOOGLE_ADS_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_ADS_DEVELOPER_TOKEN }}
+          GOOGLE_ADS_CLIENT_ID: ${{ secrets.GOOGLE_ADS_CLIENT_ID }}
+          GOOGLE_ADS_CLIENT_SECRET: ${{ secrets.GOOGLE_ADS_CLIENT_SECRET }}
+          GOOGLE_ADS_REFRESH_TOKEN: ${{ secrets.GOOGLE_ADS_REFRESH_TOKEN }}
+          GOOGLE_ADS_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_CUSTOMER_ID }}
+          GOOGLE_ADS_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_LOGIN_CUSTOMER_ID }}
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+          META_AD_ACCOUNT_ID: ${{ secrets.META_AD_ACCOUNT_ID }}
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+          SISTRIX_API_KEY: ${{ secrets.SISTRIX_API_KEY }}
+          SISTRIX_DOMAIN: ${{ secrets.SISTRIX_DOMAIN }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DB_WEEKLY_NUMBERS: ${{ secrets.NOTION_DB_WEEKLY_NUMBERS }}
+          NOTION_DB_TASKS: ${{ secrets.NOTION_DB_TASKS }}
+          NOTION_DB_LEARNINGS: ${{ secrets.NOTION_DB_LEARNINGS }}
+          NOTION_DB_CONTENT_PLAN: ${{ secrets.NOTION_DB_CONTENT_PLAN }}
+          NOTION_DB_ANOMALIES: ${{ secrets.NOTION_DB_ANOMALIES }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DASHBOARD_PASSWORD: ${{ secrets.DASHBOARD_PASSWORD }}
+        run: python3 jobs/weekly_numbers_update.py
+
+      - name: Aenderungen an dashboard/index.html committen
+        run: |
+          git config user.name "spa-deluxe-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add dashboard/index.html
+          if git diff --cached --quiet; then
+            echo "Keine Aenderungen am Dashboard."
+          else
+            git commit -m "chore: weekly dashboard update ($(date -u +%Y-%m-%d))"
+            git push
+          fi
+
+      - name: Auf Ziel-Repo (GitHub Pages) deployen
+        if: ${{ env.DASHBOARD_REPO != '' && env.GH_PAGES_TOKEN != '' }}
+        env:
+          DASHBOARD_REPO: ${{ secrets.DASHBOARD_REPO }}
+          GH_PAGES_TOKEN: ${{ secrets.GH_PAGES_TOKEN }}
+        run: |
+          rm -rf /tmp/pages-deploy
+          git clone "https://x-access-token:${GH_PAGES_TOKEN}@github.com/${DASHBOARD_REPO}.git" /tmp/pages-deploy
+          cp dashboard/index.html /tmp/pages-deploy/index.html
+          cd /tmp/pages-deploy
+          git config user.name "spa-deluxe-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "Pages-Repo bereits aktuell."
+          else
+            git commit -m "chore: dashboard update ($(date -u +%Y-%m-%d))"
+            git push
+          fi
