@@ -1,0 +1,81 @@
+# Approximate "typical birth year" per German first name, based on well documented
+# German first-name popularity waves (Gesellschaft für deutsche Sprache / historical
+# Vornamen-Charts). This is intentionally a rough heuristic ("AltersTENDENZ"), not a fact.
+NAME_BIRTH_YEAR = {
+ # --- male, older generations ---
+ "Wolfgang":1938,"Gerhard":1938,"Werner":1937,"Guenter":1938,"Günter":1938,"Günther":1938,
+ "Horst":1938,"Rolf":1940,"Manfred":1941,"Siegfried":1938,"Heinz":1935,"Karl-Heinz":1938,
+ "Hans":1943,"Helmut":1938,"Walter":1934,"Erwin":1934,"Kurt":1932,"Herbert":1938,
+ "Hermann":1935,"Erich":1934,"Wilhelm":1933,"Alfred":1937,"Friedrich":1938,"Ernst":1934,
+ "Rudolf":1940,"Karl":1940,"Franz":1943,"Johann":1943,"Bruno":1943,"Hubert":1943,
+ "Reinhold":1940,"Lothar":1948,"Günter":1938,"Eugen":1944,"Heinrich":1938,"Josef":1948,
+ "Georg":1945,"Otto":1935,"Adolf":1935,"Fritz":1935,
+ # --- male, 1943-1958 wave ---
+ "Klaus":1943,"Dieter":1943,"Juergen":1948,"Jürgen":1948,"Peter":1948,"Hartmut":1946,
+ "Eberhard":1943,"Ulrich":1948,"Reinhard":1946,"Bernd":1950,"Rainer":1950,"Ruediger":1950,
+ "Rüdiger":1950,"Hans-Peter":1946,"Detlef":1950,"Volker":1954,"Uwe":1955,"Roland":1955,
+ "Norbert":1954,"Joachim":1946,"Harald":1952,"Guenther":1946,"Christof":1952,"Christoph":1972,
+ "Armin":1955,"Bernhard":1955,"Lutz":1955,"Achim":1958,"Guido":1962,"Werner":1937,
+ "Claus":1952,"Boris":1976,"Marion":1960,"Ludger":1955,"Gerald":1960,"Bodo":1955,
+ "Roger":1960,"Angela":1963,"Sylvia":1958,"Doris":1950,"Jutta":1955,"Gabriele":1958,
+ "Anita":1955,"Heidi":1955,"Anette":1960,"Anke":1968,
+ # --- male, 1958-1975 (Andreas/Michael/Thomas wave) ---
+ "Andreas":1965,"Michael":1962,"Thomas":1968,"Stefan":1971,"Stephan":1971,"Frank":1968,
+ "Uwe":1958,"Joerg":1963,"Jörg":1963,"Matthias":1970,"Mathias":1970,"Martin":1972,
+ "Robert":1975,"Marco":1976,"Jens":1968,"Florian":1982,"Oliver":1972,"Tobias":1985,
+ "Sven":1972,"Bernd":1958,"Patrick":1985,"Dirk":1968,"Sascha":1982,"Thorsten":1972,
+ "Steffen":1975,"Holger":1968,"Marcel":1985,"Dennis":1985,"Marc":1984,"Jan":1986,
+ "Johannes":1980,"Philipp":1986,"Marcus":1978,"Simon":1990,"Benjamin":1990,"Andre":1976,
+ "André":1976,"Torsten":1970,"Carsten":1970,"Lars":1970,"Timo":1985,"Manuel":1988,
+ "Mario":1974,"Kai":1974,"Olaf":1968,"Heiko":1970,"Ingo":1970,"Kevin":1994,"Melanie":1984,
+ "Ralph":1948,"Ralf":1968,"Volker":1954,"Georg":1965,"Tim":1990,"Dominik":1990,
+ "Nicolas":1985,"Eric":1980,"Erik":1985,"Adrian":1988,"Roman":1980,"Jonas":1995,
+ "Marko":1978,"Mark":1978,"Clemens":1978,"Bianca":1980,"Denis":1985,"Danny":1985,
+ "Frederik":1985,"Malte":1985,"Hannes":1985,"Henning":1975,"Gregor":1965,"Dominic":1988,
+ "Arne":1978,"Marvin":1992,"Torben":1985,"Sönke":1975,"Soenke":1975,"Gunnar":1970,
+ "Tino":1978,"Karsten":1970,"Björn":1978,"Bjoern":1978,"Nils":1980,"Maik":1975,
+ "Reiner":1955,"Reinhard":1946,"Richard":1948,"Jochen":1962,"Christof":1968,
+ "Achim":1958,"Rene":1980,"René":1980,"Mike":1982,"Robin":1988,"Rene":1980,
+ # --- male, 1978-1998 wave ---
+ "Christian":1985,"Sebastian":1986,"Daniel":1987,"Alexander":1985,"Julian":1990,
+ "Fabian":1988,"David":1988,"Maximilian":1993,"Max":1993,"Felix":1988,"Nico":1990,
+ "Pascal":1990,"Chris":1988,"Christopher":1988,"Paul":1993,"Moritz":1990,"Nils":1988,
+ "Benedikt":1990,"Bastian":1988,"Philip":1988,"Erik":1988,"Antonio":1985,"Enrico":1980,
+ "Konstantin":1990,"Maurice":1990,"Raphael":1990,"Mehmet":1988,"Andy":1985,"Kim":1990,
+ "Francesco":1985,"Adam":1985,
+ # --- female, 1938-1955 ---
+ "Ingrid":1940,"Ursula":1940,"Brigitte":1940,"Renate":1943,"Erika":1938,"Gisela":1938,
+ "Christa":1940,"Hannelore":1943,"Rosemarie":1940,"Elisabeth":1945,"Elke":1958,
+ "Barbara":1958,"Monika":1958,"Karin":1958,"Ute":1958,"Angelika":1963,"Dagmar":1955,
+ "Marion":1958,"Jutta":1955,"Christiane":1963,"Christel":1945,"Eva":1965,"Ingeborg":1943,
+ # --- female, 1958-1975 ---
+ "Susanne":1966,"Petra":1962,"Sabine":1966,"Andrea":1967,"Regina":1962,"Cornelia":1963,
+ "Birgit":1963,"Martina":1968,"Kerstin":1968,"Silke":1970,"Christine":1963,"Manuela":1970,
+ "Heike":1968,"Simone":1970,"Beate":1963,"Ulrike":1963,"Kirsten":1965,"Elke":1958,
+ "Carmen":1970,"Ute":1958,"Bettina":1968,"Britta":1968,
+ # --- female, 1968-1985 ---
+ "Nicole":1972,"Claudia":1972,"Anja":1970,"Julia":1987,"Tanja":1976,"Sonja":1967,
+ "Sandra":1974,"Stefanie":1978,"Stephanie":1980,"Nadine":1980,"Katharina":1985,
+ "Alexandra":1980,"Michaela":1975,"Anne":1975,"Yvonne":1978,"Kathrin":1972,"Katrin":1972,
+ "Katja":1975,"Jasmin":1985,"Kristina":1978,"Melanie":1984,"Christina":1978,"Bianca":1980,
+ "Denise":1985,"Nadine":1980,"Anke":1968,"Verena":1978,"Jana":1978,"Vanessa":1985,
+ "Maike":1980,"Carola":1970,"Ramona":1978,"Inga":1978,"Natascha":1980,"Judith":1968,
+ "Angela":1963,"Sina":1985,"Annika":1985,"Saskia":1980,"Mandy":1980,"Denise":1985,
+ # --- female, 1985-2000 ---
+ "Sarah":1990,"Jennifer":1988,"Lisa":1990,"Laura":1990,"Carolin":1985,"Elena":1990,
+ "Carina":1985,"Lena":1992,"Johanna":1990,"Natalie":1985,"Sabrina":1985,"Marina":1980,
+ "Andrea":1967,"Anna":1955,"Maria":1955,"Petra":1962,
+ # --- added: most frequent previously-missing names (2026-08 update) ---
+ "Markus":1975,"Axel":1958,"Lukas":1998,"Daniela":1975,"Tom":1997,"Anton":1945,
+ "Dietmar":1955,"Marius":1985,"Hendrik":1988,"Silvia":1960,"Nina":1988,"Ronny":1978,
+ "Udo":1955,"Annette":1963,"Alex":1985,"Eduard":1955,"Tina":1978,"Gerd":1940,
+ "Jakob":1990,"Evelyn":1970,"Janina":1988,"Gerrit":1988,"Mirko":1975,"Hanno":1955,
+ "Meike":1978,"Susan":1980,"Diana":1980,"Ludwig":1945,"Veronika":1975,"Alain":1975,
+ "Leon":1998,"Gina":1985,"Niels":1985,"Ali":1980,"Franziska":1988,"Henry":1998,
+ "Detlev":1950,"Andree":1976,"Elias":1998,"Jeannette":1975,"Ulf":1958,"Leo":1995,
+ "Steven":1988,"Henrik":1985,"Michel":1985,"Esther":1975,"Antje":1975,"Regine":1955,
+ "Thilo":1978,"Melissa":1988,"Silvio":1978,"Jörn":1970,"Joern":1970,"Janine":1985,
+ "Ricardo":1985,"Sören":1985,"Soeren":1985,"Annegret":1950,"Darja":1985,"Lorenz":1985,
+ # --- titles / non-names -> unknown ---
+ "Herr":None,"Frau":None,"Dr":None,"Familie":None,"Fam":None,"Firma":None,
+}

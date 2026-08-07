@@ -18,6 +18,7 @@ WICHTIG: dashboard/index.html enthält NUR den verschlüsselten Blob – die Kla
 Kundendaten (Namen, Beträge, PLZ) landen NIE unverschlüsselt im Git-Repo.
 """
 import json
+import os
 import sys
 from collections import defaultdict
 from datetime import date
@@ -26,7 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from lib import config, forecast, weather_client, crypto  # noqa: E402
+from lib import config, forecast, weather_client, crypto, hubspot_processing  # noqa: E402
 
 PROCESSED_ROWS = ROOT / "data" / "cache" / "processed_rows.json"
 SNAPDATA_PATH = ROOT / "data" / "cache" / "snapdata.json"
@@ -36,11 +37,27 @@ LOCAL_PREVIEW_PATH = ROOT / "dashboard" / "_local_preview.html"
 
 
 def load_deal_rows() -> list:
+    """Holt die Deal-Rows live aus HubSpot (Secret HUBSPOT_PRIVATE_APP_TOKEN),
+    cached sie danach lokal fuer den Fallback-Fall. Ist kein Token gesetzt
+    (z.B. lokale Entwicklung), wird der letzte Cache-Stand verwendet."""
+    token = os.environ.get("HUBSPOT_PRIVATE_APP_TOKEN")
+    if token:
+        try:
+            rows = hubspot_processing.fetch_live_processed_rows(token)
+            print(f"HubSpot live: {len(rows)} gewonnene Deals gezogen.")
+            PROCESSED_ROWS.parent.mkdir(parents=True, exist_ok=True)
+            PROCESSED_ROWS.write_text(
+                json.dumps(rows, ensure_ascii=False), encoding="utf-8"
+            )
+            return rows
+        except Exception as e:  # noqa: BLE001 - harter Fallback auf Cache
+            print(f"WARNUNG: HubSpot Live-Pull fehlgeschlagen ({e}). "
+                  f"Nutze letzten Cache-Stand, falls vorhanden.")
+
     if not PROCESSED_ROWS.exists():
         raise SystemExit(
-            f"Keine Deal-Daten gefunden unter {PROCESSED_ROWS}. "
-            f"Lege einen HubSpot-Export dort ab oder implementiere den Live-API-Pull "
-            f"in lib/hubspot_processing.py (Secret: HUBSPOT_PRIVATE_APP_TOKEN)."
+            f"Keine Deal-Daten gefunden unter {PROCESSED_ROWS} und kein "
+            f"HUBSPOT_PRIVATE_APP_TOKEN gesetzt bzw. Live-Pull fehlgeschlagen."
         )
     return json.loads(PROCESSED_ROWS.read_text(encoding="utf-8"))
 
