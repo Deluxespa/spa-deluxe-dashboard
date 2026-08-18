@@ -251,15 +251,15 @@ canvas{max-height:240px}
   <div class="card-lg">
     <h3>🌤️ Wetter-Signal</h3>
     <div class="weather-strip">
-      <div class="weather-item"><div class="wi-val">28.2°C</div><div class="wi-label">Ø Temp August 2026</div></div>
+      <div class="weather-item"><div class="wi-val" id="wxCurTemp">–</div><div class="wi-label" id="wxCurTempLabel">Ø Temp (Vorhersage)</div></div>
       <div style="color:#27272a;font-size:24px;">→</div>
-      <div class="weather-item"><div class="wi-val">23.7°C</div><div class="wi-label">Vorjahr</div></div>
+      <div class="weather-item"><div class="wi-val" id="wxPriorTemp">–</div><div class="wi-label">Vorjahr</div></div>
       <div style="color:#27272a;font-size:24px;">→</div>
-      <div class="weather-item"><div class="wi-val" style="color:#4ade80;">+4.5°C</div><div class="wi-label">Delta</div></div>
+      <div class="weather-item"><div class="wi-val" id="wxDelta">–</div><div class="wi-label">Delta</div></div>
       <div style="color:#27272a;font-size:24px;">→</div>
-      <div class="weather-item"><div class="wi-val" style="color:#4ade80;">+15</div><div class="wi-label">Wetter-Δ Deals</div></div>
+      <div class="weather-item"><div class="wi-val" id="wxDeltaDeals">–</div><div class="wi-label">Wetter-Δ Deals</div></div>
     </div>
-    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Sensitivität: 3.4 Deals pro °C (basierend auf 14 Monaten)</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;" id="wxSensNote">Sensitivität: noch nicht genug Monatshistorie</div>
   </div>
   <div class="card-lg">
     <h3>🔍 SEO-Signal</h3>
@@ -1139,6 +1139,45 @@ var MNAMES = {'01':'Januar','02':'Februar','03':'März','04':'April','05':'Mai',
 var histChart = null;
 
 function fmt(n) { return '€' + Math.round(n).toLocaleString('de-DE'); }
+
+(function(){
+  // Live Wetter-Signal-Karte mit echten, aus snapData berechneten Werten fuellen
+  // (statt der frueheren fest hinterlegten Demo-Zahlen). Siehe
+  // jobs/weekly_numbers_update.py -> build_weather_detail().
+  var liveMk = Object.keys(SNAPS).sort().reverse().find(function(k){ return SNAPS[k].status === 'live'; });
+  var wd = (liveMk && SNAPS[liveMk].forecast && SNAPS[liveMk].forecast.weather_detail) || {};
+  var elCur = document.getElementById('wxCurTemp');
+  var elCurLabel = document.getElementById('wxCurTempLabel');
+  var elPrior = document.getElementById('wxPriorTemp');
+  var elDelta = document.getElementById('wxDelta');
+  var elDeltaDeals = document.getElementById('wxDeltaDeals');
+  var elSensNote = document.getElementById('wxSensNote');
+  if (!elCur) return;
+
+  if (liveMk) {
+    var mm = liveMk.slice(5, 7), yy = liveMk.slice(0, 4);
+    elCurLabel.textContent = 'Ø Temp ' + (MNAMES[mm] || mm) + ' ' + yy + ' (14-Tage-FC)';
+  }
+  elCur.textContent = (wd.avg_temp_current != null) ? wd.avg_temp_current.toFixed(1) + '°C' : '–';
+  elPrior.textContent = (wd.avg_temp_prior_year != null) ? wd.avg_temp_prior_year.toFixed(1) + '°C' : '–';
+  if (wd.delta_temp != null) {
+    elDelta.textContent = (wd.delta_temp >= 0 ? '+' : '') + wd.delta_temp.toFixed(1) + '°C';
+    elDelta.style.color = wd.delta_temp >= 0 ? '#4ade80' : '#f87171';
+  } else {
+    elDelta.textContent = '–';
+  }
+  if (wd.delta_deals != null) {
+    elDeltaDeals.textContent = (wd.delta_deals >= 0 ? '+' : '') + wd.delta_deals;
+    elDeltaDeals.style.color = wd.delta_deals >= 0 ? '#4ade80' : '#f87171';
+  } else {
+    elDeltaDeals.textContent = '–';
+  }
+  if (wd.sensitivity_deals_per_c != null) {
+    elSensNote.textContent = 'Sensitivität: ' + wd.sensitivity_deals_per_c.toFixed(1) + ' Deals pro °C (echte Regression über ' + wd.n_months + ' abgeschlossene Monate)';
+  } else {
+    elSensNote.textContent = 'Sensitivität: noch nicht genug Monatshistorie (mind. 3 abgeschlossene Monate nötig)';
+  }
+})();
 
 function switchMonth(val) {
   var liveEl = document.getElementById('liveView');

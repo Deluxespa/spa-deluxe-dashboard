@@ -24,6 +24,7 @@ import sys
 from collections import defaultdict
 from datetime import date
 from pathlib import Path
+from typing import Optional
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -120,7 +121,58 @@ def build_seasonal_index(monthly_agg: dict) -> dict:
     return {m: round(sum(vs) / len(vs), 3) for m, vs in idx_samples.items() if vs}
 
 
-def build_forecast_block(mk: str, monthly_agg: dict, seasonal_idx: dict) -> dict:
+def _linreg_slope(pairs: list) -> Optional[float]:
+    """Einfache Least-Squares-Steigung y = slope*x + b über (x, y)-Paare.
+    None, wenn zu wenige Punkte oder keine Streuung in x (Division durch 0)."""
+    pts = [(x, y) for x, y in pairs if x is not None and y is not None]
+    if len(pts) < 3:
+        return None
+    xs = [p[0] for p in pts]
+    ys = [p[1] for p in pts]
+    xbar = sum(xs) / len(xs)
+    ybar = sum(ys) / len(ys)
+    num = sum((x - xbar) * (y - ybar) for x, y in pts)
+    den = sum((x - xbar) ** 2 for x in xs)
+    if den == 0:
+        return None
+    return num / den
+
+
+def build_weather_detail(y: int, m: int, wetter_fc: dict, weather_deals_pairs: list) -> dict:
+    """Zusätzliche, für die Dashboard-Karte "Wetter-Signal" aufbereitete Werte:
+    aktuelle Ø Vorhersage-Temperatur, Ø Temperatur im selben Monat letztes Jahr
+    (echte Open-Meteo-Archivdaten), Delta, sowie eine aus der bisherigen
+    Monatshistorie (Temperatur vs. Deals) real berechnete Sensitivität
+    ("X Deals pro °C"). Liefert überall None, wo (noch) nicht genug Daten da
+    sind - das Frontend zeigt dann "–" statt erfundener Zahlen."""
+    avg_temp_current = weather_client.avg_forecast_tmax(wetter_fc)
+
+    prior_year = y - 1
+    prior_hist = weather_client.fetch_historical_month(prior_year, m)
+    avg_temp_prior_year = prior_hist.get("avg_temp_max")
+
+    delta_temp = None
+    if avg_temp_current is not None and avg_temp_prior_year is not None:
+        delta_temp = round(avg_temp_current - avg_temp_prior_year, 1)
+
+    n_months = len([p for p in weather_deals_pairs if p[0] is not None and p[1] is not None])
+    sensitivity = _linreg_slope(weather_deals_pairs)
+
+    delta_deals = None
+    if delta_temp is not None and sensitivity is not None:
+        delta_deals = round(delta_temp * sensitivity)
+
+    return {
+        "avg_temp_current": avg_temp_current,
+        "avg_temp_prior_year": avg_temp_prior_year,
+        "delta_temp": delta_temp,
+        "sensitivity_deals_per_c": round(sensitivity, 2) if sensitivity is not None else None,
+        "delta_deals": delta_deals,
+        "n_months": n_months,
+    }
+
+
+def build_forecast_block(mk: str, monthly_agg: dict, seasonal_idx: dict, weather_deals_pairs: list = None) -> dict:
     y, m = int(mk[:4]), int(mk[5:7])
 
     # Pacing: bisheriger Umsatz in diesem Monat vs. Ø der letzten bis zu 3 Vormonate
@@ -133,6 +185,7 @@ def build_forecast_block(mk: str, monthly_agg: dict, seasonal_idx: dict) -> dict
 
     wetter_fc = weather_client.fetch_forecast()
     wetter = forecast.wetter_signal(weather_client.weather_signal(wetter_fc))
+    weather_detail = build_weather_detail(y, m, wetter_fc, weather_deals_pairs or [])
 
     seo = forecast.seo_signal(None)  # TODO: SISTRIX_API_KEY
     ads = forecast.ads_effizienz_signal(None)  # TODO: Google/Meta Ads API
@@ -157,6 +210,7 @@ def build_forecast_block(mk: str, monthly_agg: dict, seasonal_idx: dict) -> dict
         "weights_used": forecast.BASE_WEIGHTS,
         "combined_score": result.combined_score,
         "missing_signals": result.missing,
+        "weather_detail": weather_detail,
     }
 
 
@@ -176,6 +230,7 @@ def build_snapdata(rows: list) -> dict:
     existing = load_existing_snap()
 
     snap = {}
+    weather_deals_pairs = []  # (avg_temp_max, deals_won) je abgeschlossenem Monat -> Basis fuer Wetter-Sensitivitaet
     for mk, agg in sorted(monthly_agg.items()):
         y, m = int(mk[:4]), int(mk[5:7])
         past = is_past_month(mk, today)
@@ -187,6 +242,8 @@ def build_snapdata(rows: list) -> dict:
             weather = cached["weather"]
         else:
             weather = weather_client.fetch_historical_month(y, m) if past else None
+        if past and weather:
+            weather_deals_pairs.append((weather.get("avg_temp_max"), agg["deals_won"]))
         entry = {
             "month": mk,
             "status": "final" if past else "live",
@@ -203,7 +260,7 @@ def build_snapdata(rows: list) -> dict:
             "saved_at": today.isoformat(),
         }
         if not past:
-            entry["forecast"] = build_forecast_block(mk, monthly_agg, seasonal_idx)
+            entry["forecast"] = build_forecast_block(mk, monthly_agg, seasonal_idx, weather_deals_pairs)
         snap[mk] = entry
     return snap
 

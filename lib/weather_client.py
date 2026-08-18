@@ -8,6 +8,7 @@ laut Team-Erfahrung eher Herbst/Winter-Peak).
 import statistics
 import urllib.request
 import json
+from typing import Optional
 
 # Städte grob proportional zu den Top-Regionen aus den Zoho-CRM-Deal-Daten
 CITIES = {
@@ -41,6 +42,17 @@ def fetch_forecast(days: int = 14) -> dict:
         except Exception as e:
             out[city] = {"error": str(e)}
     return out
+
+
+def avg_forecast_tmax(forecast: dict) -> Optional[float]:
+    """Durchschnittliche Tageshöchsttemperatur (°C) über alle Städte/Tage im
+    fetch_forecast()-Ergebnis. None, falls keine Daten (z.B. Netzwerkfehler)."""
+    tmax_all = []
+    for city, d in forecast.items():
+        tmax_all += [t for t in d.get("tmax", []) if t is not None]
+    if not tmax_all:
+        return None
+    return round(statistics.mean(tmax_all), 1)
 
 
 def weather_signal(forecast: dict) -> float:
