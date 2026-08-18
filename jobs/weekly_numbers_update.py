@@ -2,9 +2,10 @@
 """
 Haupt-Job "weekly-numbers-update" (analog zum Original-System):
 
-1. Lädt die HubSpot-Deal-Daten (aktuell: aus dem lokalen CSV-Cache/Export;
-   sobald HUBSPOT_PRIVATE_APP_TOKEN gesetzt ist, kann hier stattdessen live
-   über die HubSpot-API gezogen werden – siehe lib/hubspot_processing.py TODO).
+1. Lädt die Zoho-CRM-Deal-Daten live über die Zoho-API (siehe
+   lib/zoho_processing.py). Ist kein ZOHO_REFRESH_TOKEN gesetzt oder
+   schlägt der Live-Pull fehl, wird auf den letzten lokalen Cache-Stand
+   zurückgefallen (siehe load_deal_rows() unten).
 2. Aggregiert pro Kalendermonat: deals_won, revenue, wpk (Wert pro Kunde).
 3. Holt echtes Wetter (historisch für vergangene Monate, 14-Tage-Vorhersage
    für den laufenden Monat) via Open-Meteo – kein API-Key nötig.
@@ -18,7 +19,6 @@ WICHTIG: dashboard/index.html enthält NUR den verschlüsselten Blob – die Kla
 Kundendaten (Namen, Beträge, PLZ) landen NIE unverschlüsselt im Git-Repo.
 """
 import json
-import os
 import sys
 from collections import defaultdict
 from datetime import date
@@ -27,7 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from lib import config, forecast, weather_client, crypto, hubspot_processing  # noqa: E402
+from lib import config, forecast, weather_client, crypto, zoho_processing  # noqa: E402
 
 PROCESSED_ROWS = ROOT / "data" / "cache" / "processed_rows.json"
 SNAPDATA_PATH = ROOT / "data" / "cache" / "snapdata.json"
@@ -37,27 +37,30 @@ LOCAL_PREVIEW_PATH = ROOT / "dashboard" / "_local_preview.html"
 
 
 def load_deal_rows() -> list:
-    """Holt die Deal-Rows live aus HubSpot (Secret HUBSPOT_PRIVATE_APP_TOKEN),
-    cached sie danach lokal fuer den Fallback-Fall. Ist kein Token gesetzt
-    (z.B. lokale Entwicklung), wird der letzte Cache-Stand verwendet."""
-    token = os.environ.get("HUBSPOT_PRIVATE_APP_TOKEN")
-    if token:
+    """Holt die Deal-Rows live aus Zoho CRM (Secrets ZOHO_CLIENT_ID/
+    ZOHO_CLIENT_SECRET/ZOHO_REFRESH_TOKEN), cached sie danach lokal fuer den
+    Fallback-Fall. Sind die Secrets nicht gesetzt (z.B. lokale Entwicklung),
+    wird der letzte Cache-Stand verwendet."""
+    has_zoho_creds = not config.missing(
+        "ZOHO_CLIENT_ID", "ZOHO_CLIENT_SECRET", "ZOHO_REFRESH_TOKEN"
+    )
+    if has_zoho_creds:
         try:
-            rows = hubspot_processing.fetch_live_processed_rows(token)
-            print(f"HubSpot live: {len(rows)} gewonnene Deals gezogen.")
+            rows = zoho_processing.fetch_live_processed_rows()
+            print(f"Zoho CRM live: {len(rows)} gewonnene Deals gezogen.")
             PROCESSED_ROWS.parent.mkdir(parents=True, exist_ok=True)
             PROCESSED_ROWS.write_text(
                 json.dumps(rows, ensure_ascii=False), encoding="utf-8"
             )
             return rows
         except Exception as e:  # noqa: BLE001 - harter Fallback auf Cache
-            print(f"WARNUNG: HubSpot Live-Pull fehlgeschlagen ({e}). "
+            print(f"WARNUNG: Zoho Live-Pull fehlgeschlagen ({e}). "
                   f"Nutze letzten Cache-Stand, falls vorhanden.")
 
     if not PROCESSED_ROWS.exists():
         raise SystemExit(
-            f"Keine Deal-Daten gefunden unter {PROCESSED_ROWS} und kein "
-            f"HUBSPOT_PRIVATE_APP_TOKEN gesetzt bzw. Live-Pull fehlgeschlagen."
+            f"Keine Deal-Daten gefunden unter {PROCESSED_ROWS} und keine "
+            f"ZOHO_* Secrets gesetzt bzw. Live-Pull fehlgeschlagen."
         )
     return json.loads(PROCESSED_ROWS.read_text(encoding="utf-8"))
 
@@ -132,7 +135,7 @@ def build_forecast_block(mk: str, monthly_agg: dict, seasonal_idx: dict) -> dict
 
     seo = forecast.seo_signal(None)  # TODO: SISTRIX_API_KEY
     ads = forecast.ads_effizienz_signal(None)  # TODO: Google/Meta Ads API
-    sales_cycle = forecast.sales_cycle_signal(0, 0)  # TODO: HubSpot Lead-Stage-Timestamps
+    sales_cycle = forecast.sales_cycle_signal(0, 0)  # TODO: Zoho Lead-Stage-Timestamps
 
     signals = [pacing, saisonal, wetter, seo, ads, sales_cycle]
     result = forecast.combine(signals)

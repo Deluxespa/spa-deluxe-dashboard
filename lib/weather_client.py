@@ -9,7 +9,7 @@ import statistics
 import urllib.request
 import json
 
-# Städte grob proportional zu den Top-Regionen aus den HubSpot-Daten
+# Städte grob proportional zu den Top-Regionen aus den Zoho-CRM-Deal-Daten
 CITIES = {
     "Berlin": (52.52, 13.405),
     "Hamburg": (53.55, 9.993),

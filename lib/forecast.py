@@ -10,7 +10,7 @@
                       beim Ensemble übersprungen und die übrigen Gewichte werden renormiert.
   5. Ads-Effizienz  – CPL/CPC-Trend aus Google Ads + Meta Ads der letzten 2 Wochen vs. Vormonat.
                       Ohne API-Zugang: Signal=None -> übersprungen.
-  6. Sales-Cycle    – Durchschnittliche Zeit von Lead bis Deal-Win (aus HubSpot-Historie),
+  6. Sales-Cycle    – Durchschnittliche Zeit von Lead bis Deal-Win (aus Zoho-CRM-Historie),
                       um zu schätzen wie viele der *aktuellen* Leads noch in diesem Monat
                       konvertieren vs. erst im Folgemonat.
 

@@ -1,5 +1,5 @@
 """
-Zeigt fuer jede Integration (HubSpot, Google Ads, Meta, GSC, Sistrix, Notion, ...)
+Zeigt fuer jede Integration (Zoho CRM, Google Ads, Meta, GSC, Sistrix, Notion, ...)
 an, ob die noetigen Secrets/ENV-Variablen gesetzt sind - ohne echte API-Calls
 zu machen. Nuetzlich direkt nach dem Anlegen von .env oder den GitHub Secrets,
 um Tippfehler/fehlende Werte schnell zu finden.

@@ -52,7 +52,7 @@ def missing(*names) -> list:
 # ---- Vollständige Secrets-Registry (Single Source of Truth) ----
 # Wird von jobs/api_smoke_test.py genutzt, um den Status jeder Integration zu zeigen.
 SECRET_GROUPS = {
-    "HubSpot": ["HUBSPOT_PRIVATE_APP_TOKEN"],
+    "Zoho CRM": ["ZOHO_CLIENT_ID", "ZOHO_CLIENT_SECRET", "ZOHO_REFRESH_TOKEN"],
     "Google Ads": [
         "GOOGLE_ADS_DEVELOPER_TOKEN",
         "GOOGLE_ADS_CLIENT_ID",

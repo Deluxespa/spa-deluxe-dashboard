@@ -1,7 +1,7 @@
 # SPA Deluxe – Marketing Intelligence Dashboard
 
 Automatisiertes, passwortgeschütztes Dashboard für SPA Deluxe. Aggregiert
-HubSpot-Deals (Umsatz, Region, Produktkategorie, geschätztes Kundenalter),
+Zoho-CRM-Deals (Umsatz, Region, Produktkategorie, geschätztes Kundenalter),
 Wetterdaten und (sobald Secrets gesetzt sind) Google Ads / Meta Ads / Google
 Search Console / Sistrix / Notion zu einem Forecast- und KPI-Dashboard.
 
@@ -20,7 +20,8 @@ jobs/      Ausführbare Skripte
                               bauen & verschlüsseln (idempotent, cached)
   api_smoke_test.py           Prüft, welche Secrets/Integrationen gesetzt sind
 data/
-  raw/      Rohdaten-Exporte (HubSpot-CSV etc.) – NICHT im Git-Repo
+  raw/      Historische Rohdaten-Exporte (Altlast, nicht mehr im Live-Betrieb
+            genutzt seit dem Umstieg auf den Zoho-CRM-Live-Pull) – NICHT im Git-Repo
   cache/    Verarbeitete Zwischenstände (processed_rows.json, snapdata.json)
             – NICHT im Git-Repo, wird bei jedem Lauf neu erzeugt
 dashboard/
@@ -39,8 +40,11 @@ cp .env.example .env
 # .env öffnen und mindestens DASHBOARD_PASSWORD setzen
 ```
 
-HubSpot-Export als CSV nach `data/raw/` legen (Dateiname beliebig, Endung
-`.csv`), dann:
+`.env` mit den Zoho-CRM-Secrets (`ZOHO_CLIENT_ID`, `ZOHO_CLIENT_SECRET`,
+`ZOHO_REFRESH_TOKEN`, siehe `.env.example`) füllen – die Deal-Daten werden
+dann live per Zoho-API gezogen (kein manueller CSV-Export mehr nötig). Ohne
+diese Secrets wird lokal einfach der letzte Cache-Stand aus
+`data/cache/processed_rows.json` weiterverwendet, falls vorhanden. Dann:
 
 ```bash
 python3 jobs/weekly_numbers_update.py
@@ -71,7 +75,7 @@ setzen, in GitHub Actions als **Repository Secrets** unter
 | Gruppe | Variablen |
 |---|---|
 | Dashboard-Verschlüsselung (Pflicht) | `DASHBOARD_PASSWORD` |
-| HubSpot | `HUBSPOT_PRIVATE_APP_TOKEN` |
+| Zoho CRM | `ZOHO_CLIENT_ID`, `ZOHO_CLIENT_SECRET`, `ZOHO_REFRESH_TOKEN` (optional: `ZOHO_ACCOUNTS_URL`, `ZOHO_API_DOMAIN`, `ZOHO_WON_STAGES`) |
 | Google Ads | `GOOGLE_ADS_DEVELOPER_TOKEN`, `GOOGLE_ADS_CLIENT_ID`, `GOOGLE_ADS_CLIENT_SECRET`, `GOOGLE_ADS_REFRESH_TOKEN`, `GOOGLE_ADS_CUSTOMER_ID`, `GOOGLE_ADS_LOGIN_CUSTOMER_ID` |
 | Meta Ads | `META_ACCESS_TOKEN`, `META_AD_ACCOUNT_ID` |
 | Google Search Console | `GSC_SERVICE_ACCOUNT_JSON`, `GSC_SITE_URL` |
@@ -118,15 +122,21 @@ und kein zusätzliches Personal Access Token benötigt – lediglich unter
 *Settings → Pages → Build and deployment* die Quelle auf "GitHub Actions"
 stellen (einmalig).
 
-## Legacy-Skripte
+## CRM: Zoho statt HubSpot
 
-`jobs/_legacy_build_dashboard.py`, `lib/hubspot_processing.py` und
-`lib/name_ages_legacy.py` stammen aus der explorativen Anfangsphase (lokale
-Analyse, Namens-/Alters-Abschätzung, alte Dashboard-Version). Sie enthalten
-teils hartcodierte lokale Pfade und werden vom produktiven Pipeline-Job
-(`jobs/weekly_numbers_update.py`) **nicht** mehr aufgerufen – sie sind nur
-als Referenz/Nachschlagewerk für die verwendete Kategorisierungs- und
-Altersschätzungs-Logik im Repo verblieben.
+Seit 2026-08 kommen alle Leads/Deals aus **Zoho CRM** (nicht mehr HubSpot).
+Die Deal-Verarbeitung ist in zwei Module aufgeteilt:
+- `lib/zoho_processing.py` – Zoho-spezifisch: OAuth2-Refresh-Token-Flow +
+  COQL-Abfrage der gewonnenen Deals inkl. verknüpfter Kontaktdaten.
+- `lib/deal_processing.py` – CRM-unabhängige Logik (Produktkategorisierung,
+  PLZ→Region, Namens-/Altersschätzung), aufrufbar von jedem beliebigen
+  CRM-Fetcher über `build_row(...)`.
+
+Die alten HubSpot-Dateien (`jobs/_legacy_build_dashboard.py`,
+`lib/hubspot_processing.py`) wurden im Zuge der Migration entfernt. Nur
+`lib/name_ages_legacy.py` bleibt als Referenz für die
+Namens-/Altersschätzungs-Datenbasis (`NAME_BIRTH_YEAR`) erhalten, die
+weiterhin von `lib/deal_processing.py` importiert wird.
 
 ## Sicherheit
 
