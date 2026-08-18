@@ -5,11 +5,12 @@ Diese Logik (Produktkategorisierung, PLZ->Region, Namens-/Altersschaetzung,
 "processed row"-Schema) ist komplett unabhaengig davon, aus welchem CRM die
 Rohdaten (Deal-Name, Betrag, PLZ, Vorname, Nachname, Abschlussdatum) kommen.
 Frueher kam das aus HubSpot (siehe Git-Historie / lib/hubspot_processing.py),
-seit 2026-08 kommt es aus Zoho CRM (siehe lib/zoho_processing.py).
+seit 2026-08 kommt es aus Zoho CRM ueber ein Google Sheet (siehe
+lib/gsheet_processing.py).
 
 `build_row(...)` ist die zentrale Funktion, die jeder CRM-spezifische Fetcher
-(z.B. `lib/zoho_processing.fetch_live_processed_rows`) am Ende aufruft, um aus
-den 6 Rohfeldern eine "processed row" im Dashboard-Schema zu bauen.
+(z.B. `lib/gsheet_processing.fetch_live_processed_rows`) am Ende aufruft, um
+aus den 6 Rohfeldern eine "processed row" im Dashboard-Schema zu bauen.
 """
 import re
 import sys

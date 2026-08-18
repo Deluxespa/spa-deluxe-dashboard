@@ -1,9 +1,10 @@
 # SPA Deluxe – Marketing Intelligence Dashboard
 
 Automatisiertes, passwortgeschütztes Dashboard für SPA Deluxe. Aggregiert
-Zoho-CRM-Deals (Umsatz, Region, Produktkategorie, geschätztes Kundenalter),
-Wetterdaten und (sobald Secrets gesetzt sind) Google Ads / Meta Ads / Google
-Search Console / Sistrix / Notion zu einem Forecast- und KPI-Dashboard.
+Deals (Umsatz, Region, Produktkategorie, geschätztes Kundenalter) aus einem
+Google Sheet (befüllt per Zoho-Automatisierung/Zapier/Make), Wetterdaten und
+(sobald Secrets gesetzt sind) Google Ads / Meta Ads / Google Search Console /
+Sistrix / Notion zu einem Forecast- und KPI-Dashboard.
 
 Das ausgelieferte `dashboard/index.html` ist **client-seitig AES-256-GCM
 verschlüsselt** – ohne das richtige Passwort sieht man nur eine
@@ -21,7 +22,7 @@ jobs/      Ausführbare Skripte
   api_smoke_test.py           Prüft, welche Secrets/Integrationen gesetzt sind
 data/
   raw/      Historische Rohdaten-Exporte (Altlast, nicht mehr im Live-Betrieb
-            genutzt seit dem Umstieg auf den Zoho-CRM-Live-Pull) – NICHT im Git-Repo
+            genutzt seit dem Umstieg auf den Google-Sheets-Live-Pull) – NICHT im Git-Repo
   cache/    Verarbeitete Zwischenstände (processed_rows.json, snapdata.json)
             – NICHT im Git-Repo, wird bei jedem Lauf neu erzeugt
 dashboard/
@@ -40,10 +41,10 @@ cp .env.example .env
 # .env öffnen und mindestens DASHBOARD_PASSWORD setzen
 ```
 
-`.env` mit den Zoho-CRM-Secrets (`ZOHO_CLIENT_ID`, `ZOHO_CLIENT_SECRET`,
-`ZOHO_REFRESH_TOKEN`, siehe `.env.example`) füllen – die Deal-Daten werden
-dann live per Zoho-API gezogen (kein manueller CSV-Export mehr nötig). Ohne
-diese Secrets wird lokal einfach der letzte Cache-Stand aus
+`.env` mit den Google-Sheets-Secrets (`GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON`,
+`GOOGLE_SHEETS_SPREADSHEET_ID`, siehe `.env.example`) füllen – die Deal-Daten
+werden dann live aus dem Google Sheet gezogen (kein manueller CSV-Export mehr
+nötig). Ohne diese Secrets wird lokal einfach der letzte Cache-Stand aus
 `data/cache/processed_rows.json` weiterverwendet, falls vorhanden. Dann:
 
 ```bash
@@ -75,7 +76,7 @@ setzen, in GitHub Actions als **Repository Secrets** unter
 | Gruppe | Variablen |
 |---|---|
 | Dashboard-Verschlüsselung (Pflicht) | `DASHBOARD_PASSWORD` |
-| Zoho CRM | `ZOHO_CLIENT_ID`, `ZOHO_CLIENT_SECRET`, `ZOHO_REFRESH_TOKEN` (optional: `ZOHO_ACCOUNTS_URL`, `ZOHO_API_DOMAIN`, `ZOHO_WON_STAGES`) |
+| Google Sheets (Deals) | `GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON`, `GOOGLE_SHEETS_SPREADSHEET_ID` (optional: `GOOGLE_SHEETS_RANGE`, `WON_DEAL_STAGES`) |
 | Google Ads | `GOOGLE_ADS_DEVELOPER_TOKEN`, `GOOGLE_ADS_CLIENT_ID`, `GOOGLE_ADS_CLIENT_SECRET`, `GOOGLE_ADS_REFRESH_TOKEN`, `GOOGLE_ADS_CUSTOMER_ID`, `GOOGLE_ADS_LOGIN_CUSTOMER_ID` |
 | Meta Ads | `META_ACCESS_TOKEN`, `META_AD_ACCOUNT_ID` |
 | Google Search Console | `GSC_SERVICE_ACCOUNT_JSON`, `GSC_SITE_URL` |
@@ -122,15 +123,33 @@ und kein zusätzliches Personal Access Token benötigt – lediglich unter
 *Settings → Pages → Build and deployment* die Quelle auf "GitHub Actions"
 stellen (einmalig).
 
-## CRM: Zoho statt HubSpot
+## CRM: Google Sheet statt HubSpot/Zoho-API
 
-Seit 2026-08 kommen alle Leads/Deals aus **Zoho CRM** (nicht mehr HubSpot).
-Die Deal-Verarbeitung ist in zwei Module aufgeteilt:
-- `lib/zoho_processing.py` – Zoho-spezifisch: OAuth2-Refresh-Token-Flow +
-  COQL-Abfrage der gewonnenen Deals inkl. verknüpfter Kontaktdaten.
+Seit 2026-08 kommen alle Leads/Deals aus **Zoho CRM**, aber nicht mehr per
+direkter API-Anbindung: Eine Zoho-Automatisierung (native "Export to Google
+Sheets"-Extension oder Zapier/Make) schreibt die gewonnenen Deals in ein
+Google Sheet, das dieses Projekt read-only über einen Service Account
+ausliest. Die Deal-Verarbeitung ist in zwei Module aufgeteilt:
+- `lib/gsheet_processing.py` – Google-Sheets-spezifisch: Service-Account-JWT-
+  Auth (kein OAuth2-Refresh-Token nötig) + Auslesen/Parsen der Sheet-Zeilen
+  inkl. deutscher Zahlen-/Datumsformate.
 - `lib/deal_processing.py` – CRM-unabhängige Logik (Produktkategorisierung,
   PLZ→Region, Namens-/Altersschätzung), aufrufbar von jedem beliebigen
-  CRM-Fetcher über `build_row(...)`.
+  Fetcher über `build_row(...)`.
+
+**Einrichtung des Google Sheets:**
+1. In der Google Cloud Console ein Service Account anlegen und einen JSON-Key
+   herunterladen (IAM & Admin → Dienstkonten → Key erstellen).
+2. Das Ziel-Sheet mit der `client_email` des Service Accounts teilen
+   (Leserechte genügen).
+3. Den kompletten Inhalt der JSON-Key-Datei als `GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON`
+   und die Spreadsheet-ID (aus der Sheet-URL) als `GOOGLE_SHEETS_SPREADSHEET_ID`
+   hinterlegen.
+4. Die erste Zeile des Sheets muss erkennbare Spaltennamen enthalten (Deal
+   Name/Titel, Amount/Betrag, Closing Date, Stage/Status, First Name/Vorname,
+   Last Name/Nachname, Mailing Zip/PLZ/Postleitzahl) – Reihenfolge egal,
+   Groß-/Kleinschreibung egal, deutsche und englische Bezeichnungen werden
+   erkannt.
 
 Die alten HubSpot-Dateien (`jobs/_legacy_build_dashboard.py`,
 `lib/hubspot_processing.py`) wurden im Zuge der Migration entfernt. Nur

@@ -2,10 +2,11 @@
 """
 Haupt-Job "weekly-numbers-update" (analog zum Original-System):
 
-1. Lädt die Zoho-CRM-Deal-Daten live über die Zoho-API (siehe
-   lib/zoho_processing.py). Ist kein ZOHO_REFRESH_TOKEN gesetzt oder
-   schlägt der Live-Pull fehl, wird auf den letzten lokalen Cache-Stand
-   zurückgefallen (siehe load_deal_rows() unten).
+1. Lädt die Deal-Daten live aus einem Google Sheet (siehe lib/gsheet_processing.py),
+   das per Zoho-Automatisierung/Zapier/Make mit den gewonnenen Deals befüllt wird.
+   Sind die Google-Sheets-Secrets nicht gesetzt oder schlägt der Live-Pull fehl,
+   wird auf den letzten lokalen Cache-Stand zurückgefallen (siehe load_deal_rows()
+   unten).
 2. Aggregiert pro Kalendermonat: deals_won, revenue, wpk (Wert pro Kunde).
 3. Holt echtes Wetter (historisch für vergangene Monate, 14-Tage-Vorhersage
    für den laufenden Monat) via Open-Meteo – kein API-Key nötig.
@@ -27,7 +28,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from lib import config, forecast, weather_client, crypto, zoho_processing  # noqa: E402
+from lib import config, forecast, weather_client, crypto, gsheet_processing  # noqa: E402
 
 PROCESSED_ROWS = ROOT / "data" / "cache" / "processed_rows.json"
 SNAPDATA_PATH = ROOT / "data" / "cache" / "snapdata.json"
@@ -37,30 +38,30 @@ LOCAL_PREVIEW_PATH = ROOT / "dashboard" / "_local_preview.html"
 
 
 def load_deal_rows() -> list:
-    """Holt die Deal-Rows live aus Zoho CRM (Secrets ZOHO_CLIENT_ID/
-    ZOHO_CLIENT_SECRET/ZOHO_REFRESH_TOKEN), cached sie danach lokal fuer den
-    Fallback-Fall. Sind die Secrets nicht gesetzt (z.B. lokale Entwicklung),
-    wird der letzte Cache-Stand verwendet."""
-    has_zoho_creds = not config.missing(
-        "ZOHO_CLIENT_ID", "ZOHO_CLIENT_SECRET", "ZOHO_REFRESH_TOKEN"
+    """Holt die Deal-Rows live aus dem Google Sheet (Secrets
+    GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON/GOOGLE_SHEETS_SPREADSHEET_ID), cached
+    sie danach lokal fuer den Fallback-Fall. Sind die Secrets nicht gesetzt
+    (z.B. lokale Entwicklung), wird der letzte Cache-Stand verwendet."""
+    has_gsheet_creds = not config.missing(
+        "GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON", "GOOGLE_SHEETS_SPREADSHEET_ID"
     )
-    if has_zoho_creds:
+    if has_gsheet_creds:
         try:
-            rows = zoho_processing.fetch_live_processed_rows()
-            print(f"Zoho CRM live: {len(rows)} gewonnene Deals gezogen.")
+            rows = gsheet_processing.fetch_live_processed_rows()
+            print(f"Google Sheet live: {len(rows)} gewonnene Deals gezogen.")
             PROCESSED_ROWS.parent.mkdir(parents=True, exist_ok=True)
             PROCESSED_ROWS.write_text(
                 json.dumps(rows, ensure_ascii=False), encoding="utf-8"
             )
             return rows
         except Exception as e:  # noqa: BLE001 - harter Fallback auf Cache
-            print(f"WARNUNG: Zoho Live-Pull fehlgeschlagen ({e}). "
+            print(f"WARNUNG: Google-Sheets Live-Pull fehlgeschlagen ({e}). "
                   f"Nutze letzten Cache-Stand, falls vorhanden.")
 
     if not PROCESSED_ROWS.exists():
         raise SystemExit(
             f"Keine Deal-Daten gefunden unter {PROCESSED_ROWS} und keine "
-            f"ZOHO_* Secrets gesetzt bzw. Live-Pull fehlgeschlagen."
+            f"GOOGLE_SHEETS_* Secrets gesetzt bzw. Live-Pull fehlgeschlagen."
         )
     return json.loads(PROCESSED_ROWS.read_text(encoding="utf-8"))
 
