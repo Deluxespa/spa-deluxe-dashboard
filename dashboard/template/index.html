@@ -1279,7 +1279,14 @@ function fmt(n) { return '€' + Math.round(n).toLocaleString('de-DE'); }
   var spendSubEl = document.getElementById('heroSpendSub');
   if (HERO.total_spend != null) {
     spendEl.textContent = fmt(HERO.total_spend);
-    spendSubEl.textContent = 'Google + Meta + Brand';
+    var srcLabels = { google_ads: 'Google Ads', meta_perf: 'Meta', brand: 'Brand' };
+    var allSrc = ['google_ads', 'meta_perf', 'brand'];
+    var sources = HERO.spend_sources || [];
+    var connected = sources.map(function (s) { return srcLabels[s] || s; });
+    var missing = allSrc.filter(function (s) { return sources.indexOf(s) === -1; })
+      .map(function (s) { return srcLabels[s] || s; });
+    spendSubEl.textContent = connected.join(' + ') +
+      (missing.length ? ' (' + missing.join(' + ') + ' folgen)' : '');
   } else {
     spendEl.textContent = '–';
     spendSubEl.textContent = 'noch nicht verbunden';

@@ -29,7 +29,7 @@ from typing import Optional
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from lib import config, forecast, weather_client, crypto, gsheet_processing, zoho_drive_import  # noqa: E402
+from lib import config, forecast, weather_client, crypto, gsheet_processing, zoho_drive_import, google_ads_report  # noqa: E402
 
 PROCESSED_ROWS = ROOT / "data" / "cache" / "processed_rows.json"
 SNAPDATA_PATH = ROOT / "data" / "cache" / "snapdata.json"
@@ -55,6 +55,21 @@ def fetch_zoho_drive_bundle() -> Optional[dict]:
         return None
     if result.get("error"):
         print(f"WARNUNG: Zoho-Drive-Import fehlgeschlagen ({result['error']}).")
+        return None
+    return result
+
+
+def fetch_google_ads_report_safe() -> Optional[dict]:
+    """Einmaliger Abruf des "Google Ads Wochenbericht"-Sheets (Ausgaben +
+    Kampagnen, siehe lib/google_ads_report.py). Wird jeden Montag zusammen
+    mit dem Zoho-Drive-Import mitgezogen. None bei fehlenden Secrets oder
+    Fehlern (Sheet nicht freigegeben o.ä.) - der Job laeuft dann normal
+    weiter, nur ohne live verbundenen Ads-Spend/MER."""
+    if config.missing("GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON"):
+        return None
+    result = google_ads_report.fetch_google_ads_report()
+    if result.get("error"):
+        print(f"WARNUNG: Google-Ads-Wochenbericht-Import fehlgeschlagen ({result['error']}).")
         return None
     return result
 
@@ -281,11 +296,12 @@ def load_existing_snap() -> dict:
     return {}
 
 
-def build_snapdata(rows: list) -> dict:
+def build_snapdata(rows: list, ads: Optional[dict] = None) -> dict:
     today = date.today()
     monthly_agg = aggregate_by_month(rows)
     seasonal_idx = build_seasonal_index(monthly_agg)
     existing = load_existing_snap()
+    current_mk = today.strftime("%Y-%m")
 
     snap = {}
     weather_deals_pairs = []  # (avg_temp_max, deals_won) je abgeschlossenem Monat -> Basis fuer Wetter-Sensitivitaet
@@ -302,13 +318,23 @@ def build_snapdata(rows: list) -> dict:
             weather = weather_client.fetch_historical_month(y, m) if past else None
         if past and weather:
             weather_deals_pairs.append((weather.get("avg_temp_max"), agg["deals_won"]))
+        # Google-Ads-Wochenbericht-Sheet liefert nur "aktueller Monat" + YTD,
+        # keine Aufschluesselung nach vergangenen Einzelmonaten -> nur fuer
+        # den laufenden Monat live setzen, vergangene Monate bleiben None.
+        google_ads_spend = ads.get("spend_current_month_eur") if (ads and mk == current_mk) else None
+        meta_perf_spend = None  # TODO: META_* Secrets (noch nicht angebunden)
+        brand_spend = None
+        # total_spend nur setzen, wenn wir mind. eine echte Spend-Quelle haben,
+        # sonst weiter ehrlich None statt Fantasiezahlen. Sobald Meta/Brand
+        # angebunden sind, hier einfach += ergaenzen.
+        total_spend = google_ads_spend if google_ads_spend is not None else None
         entry = {
             "month": mk,
             "status": "final" if past else "live",
-            "google_ads_spend": None,   # TODO: GOOGLE_ADS_* Secrets
-            "meta_perf_spend": None,    # TODO: META_* Secrets
-            "brand_spend": None,
-            "total_spend": None,
+            "google_ads_spend": google_ads_spend,
+            "meta_perf_spend": meta_perf_spend,  # TODO: META_* Secrets
+            "brand_spend": brand_spend,
+            "total_spend": total_spend,
             "deals_won": agg["deals_won"],
             "revenue": agg["revenue"],
             "wpk": agg["wpk"],
@@ -317,6 +343,11 @@ def build_snapdata(rows: list) -> dict:
             "weather": weather,
             "saved_at": today.isoformat(),
         }
+        if not past and ads and mk == current_mk:
+            entry["google_ads_spend_ytd"] = ads.get("spend_ytd_eur")
+            entry["google_ads_account"] = ads.get("account")
+            entry["google_ads_stand"] = ads.get("stand")
+            entry["google_ads_top_campaigns"] = (ads.get("campaigns") or [])[:15]
         if not past:
             entry["forecast"] = build_forecast_block(mk, monthly_agg, seasonal_idx, weather_deals_pairs)
         snap[mk] = entry
@@ -332,12 +363,13 @@ MONTHS_DE = [
 def build_hero_block(snap: dict, leads: Optional[dict], today: date) -> dict:
     """Baut die Daten fuer die "MER Tracking"-Hero-Karte (oberste Karte im
     Dashboard). Umsatz/Verkaeufe kommen aus dem live berechneten snap[] fuer
-    den laufenden Monat, Leads+CR aus dem Zoho-Drive-Lead-Export. Marketing-
-    Spend/MER sowie Vormonat-Final/YTD sind (noch) NICHT live verbunden, da
-    weder Google/Meta-Ads-API-Secrets noch historische Monate in der Live-
-    Pipeline vorhanden sind -> bleiben bewusst None, Template zeigt dann
-    ehrlich "noch nicht verbunden" statt Fantasiezahlen (siehe Prinzip:
-    erst live bekommen, dann Schritt fuer Schritt korrekt/vollstaendig machen).
+    den laufenden Monat, Leads+CR aus dem Zoho-Drive-Lead-Export. Google-Ads-
+    Spend kommt seit dem "Google Ads Wochenbericht"-Sheet live mit (siehe
+    lib/google_ads_report.py + build_snapdata()); Meta-Ads/Brand-Spend sind
+    (noch) NICHT verbunden (kein API-Zugang) -> total_spend/MER basieren
+    aktuell nur auf Google Ads, Template zeigt das transparent an, bis auch
+    Meta/Brand angebunden sind (siehe Prinzip: erst live bekommen, dann
+    Schritt fuer Schritt korrekt/vollstaendig machen).
     """
     import calendar
 
@@ -348,8 +380,19 @@ def build_hero_block(snap: dict, leads: Optional[dict], today: date) -> dict:
 
     revenue = entry.get("revenue")
     deals_won = entry.get("deals_won")
-    total_spend = entry.get("total_spend")  # TODO: GOOGLE_ADS_*/META_* Secrets
+    total_spend = entry.get("total_spend")
     mer = round(revenue / total_spend, 2) if revenue is not None and total_spend else None
+
+    # Welche Spend-Quellen stecken aktuell in total_spend? Fuer eine ehrliche
+    # Anzeige im Template (z.B. "Google Ads (Meta + Brand folgen)"), solange
+    # noch nicht alle drei Quellen live angebunden sind.
+    spend_sources = []
+    if entry.get("google_ads_spend") is not None:
+        spend_sources.append("google_ads")
+    if entry.get("meta_perf_spend") is not None:
+        spend_sources.append("meta_perf")
+    if entry.get("brand_spend") is not None:
+        spend_sources.append("brand")
 
     leads_total = None
     if leads:
@@ -370,6 +413,7 @@ def build_hero_block(snap: dict, leads: Optional[dict], today: date) -> dict:
         "leads_total": leads_total,
         "cr_pct": cr_pct,
         "total_spend": total_spend,
+        "spend_sources": spend_sources,
         "mer": mer,
         "generated_at": today.isoformat(),
     }
@@ -424,7 +468,8 @@ def render_and_encrypt(snap: dict, leads: Optional[dict] = None, hero: Optional[
 def main():
     zoho_drive = fetch_zoho_drive_bundle()
     rows = load_deal_rows(zoho_drive)
-    snap = build_snapdata(rows)
+    ads = fetch_google_ads_report_safe()
+    snap = build_snapdata(rows, ads)
     SNAPDATA_PATH.write_text(json.dumps(snap, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"snapdata.json aktualisiert: {SNAPDATA_PATH} ({len(snap)} Monate)")
 
