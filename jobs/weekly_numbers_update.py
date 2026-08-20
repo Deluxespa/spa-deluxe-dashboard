@@ -29,7 +29,7 @@ from typing import Optional
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from lib import config, forecast, weather_client, crypto, gsheet_processing  # noqa: E402
+from lib import config, forecast, weather_client, crypto, gsheet_processing, zoho_drive_import  # noqa: E402
 
 PROCESSED_ROWS = ROOT / "data" / "cache" / "processed_rows.json"
 SNAPDATA_PATH = ROOT / "data" / "cache" / "snapdata.json"
@@ -38,14 +38,65 @@ OUTPUT_PATH = ROOT / "dashboard" / "index.html"
 LOCAL_PREVIEW_PATH = ROOT / "dashboard" / "_local_preview.html"
 
 
-def load_deal_rows() -> list:
+def fetch_zoho_drive_bundle() -> Optional[dict]:
+    """Einmaliger Abruf des jeweils neuesten Zoho-CRM-Drive-Exports (3 Dateien:
+    Top-Tier-Leads, Social-Media-Leads, Abschluesse - siehe Ordner
+    'Zoho CRM Exporte' und lib/zoho_drive_import.py). Wird sowohl fuer
+    zusaetzliche Deal-Rows als auch fuer die Lead-Zahlen-Kennzahl im Dashboard
+    verwendet (ein API-Roundtrip statt zwei). None bei fehlenden Secrets oder
+    Fehlern (Drive-API/Freigabe) - der Job laeuft dann normal mit den
+    Google-Sheet-Deals weiter, nur ohne die Zoho-Drive-Ergaenzung."""
+    if config.missing("GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON"):
+        return None
+    try:
+        result = zoho_drive_import.fetch_latest_zoho_exports()
+    except Exception as e:  # noqa: BLE001
+        print(f"WARNUNG: Zoho-Drive-Import fehlgeschlagen ({e}).")
+        return None
+    if result.get("error"):
+        print(f"WARNUNG: Zoho-Drive-Import fehlgeschlagen ({result['error']}).")
+        return None
+    return result
+
+
+def merge_deal_rows(base_rows: list, extra_rows: list) -> list:
+    """Ergaenzt base_rows (aus dem Google Sheet) um extra_rows (z.B. aus dem
+    Zoho-Drive-Abschluesse-Export), ohne offensichtliche Duplikate doppelt zu
+    zaehlen (gleicher Deal-Name + Betrag + Abschlussdatum)."""
+    def _key(r):
+        return (
+            (r.get("deal") or "").strip().lower(),
+            round(float(r.get("betrag") or 0), 2),
+            r.get("datum"),
+        )
+
+    seen = {_key(r) for r in base_rows}
+    merged = list(base_rows)
+    added, skipped = 0, 0
+    for r in extra_rows:
+        k = _key(r)
+        if k in seen:
+            skipped += 1
+            continue
+        seen.add(k)
+        merged.append(r)
+        added += 1
+    if added or skipped:
+        print(f"Zoho-Drive-Merge: {added} neue Deals hinzugefuegt, {skipped} Duplikate uebersprungen.")
+    return merged
+
+
+def load_deal_rows(zoho_drive: Optional[dict] = None) -> list:
     """Holt die Deal-Rows live aus dem Google Sheet (Secrets
     GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON/GOOGLE_SHEETS_SPREADSHEET_ID), cached
     sie danach lokal fuer den Fallback-Fall. Sind die Secrets nicht gesetzt
-    (z.B. lokale Entwicklung), wird der letzte Cache-Stand verwendet."""
+    (z.B. lokale Entwicklung), wird der letzte Cache-Stand verwendet.
+    Ist zoho_drive gesetzt (siehe fetch_zoho_drive_bundle()), werden zusaetzlich
+    die Deals aus dem Abschluesse-Export gemergt (dedupliziert)."""
     has_gsheet_creds = not config.missing(
         "GOOGLE_SHEETS_SERVICE_ACCOUNT_JSON", "GOOGLE_SHEETS_SPREADSHEET_ID"
     )
+    rows = None
     if has_gsheet_creds:
         try:
             rows = gsheet_processing.fetch_live_processed_rows()
@@ -54,17 +105,24 @@ def load_deal_rows() -> list:
             PROCESSED_ROWS.write_text(
                 json.dumps(rows, ensure_ascii=False), encoding="utf-8"
             )
-            return rows
         except Exception as e:  # noqa: BLE001 - harter Fallback auf Cache
             print(f"WARNUNG: Google-Sheets Live-Pull fehlgeschlagen ({e}). "
                   f"Nutze letzten Cache-Stand, falls vorhanden.")
 
-    if not PROCESSED_ROWS.exists():
-        raise SystemExit(
-            f"Keine Deal-Daten gefunden unter {PROCESSED_ROWS} und keine "
-            f"GOOGLE_SHEETS_* Secrets gesetzt bzw. Live-Pull fehlgeschlagen."
-        )
-    return json.loads(PROCESSED_ROWS.read_text(encoding="utf-8"))
+    if rows is None:
+        if not PROCESSED_ROWS.exists():
+            raise SystemExit(
+                f"Keine Deal-Daten gefunden unter {PROCESSED_ROWS} und keine "
+                f"GOOGLE_SHEETS_* Secrets gesetzt bzw. Live-Pull fehlgeschlagen."
+            )
+        rows = json.loads(PROCESSED_ROWS.read_text(encoding="utf-8"))
+
+    if zoho_drive:
+        extra = zoho_drive_import.abschluesse_to_processed_rows(zoho_drive.get("abschluesse", []))
+        print(f"Zoho-Drive (Abschluesse-Export): {len(extra)} Deals gezogen.")
+        rows = merge_deal_rows(rows, extra)
+
+    return rows
 
 
 def month_key(datum: str) -> str:
@@ -265,7 +323,59 @@ def build_snapdata(rows: list) -> dict:
     return snap
 
 
-def render_and_encrypt(snap: dict):
+MONTHS_DE = [
+    "Januar", "Februar", "März", "April", "Mai", "Juni",
+    "Juli", "August", "September", "Oktober", "November", "Dezember",
+]
+
+
+def build_hero_block(snap: dict, leads: Optional[dict], today: date) -> dict:
+    """Baut die Daten fuer die "MER Tracking"-Hero-Karte (oberste Karte im
+    Dashboard). Umsatz/Verkaeufe kommen aus dem live berechneten snap[] fuer
+    den laufenden Monat, Leads+CR aus dem Zoho-Drive-Lead-Export. Marketing-
+    Spend/MER sowie Vormonat-Final/YTD sind (noch) NICHT live verbunden, da
+    weder Google/Meta-Ads-API-Secrets noch historische Monate in der Live-
+    Pipeline vorhanden sind -> bleiben bewusst None, Template zeigt dann
+    ehrlich "noch nicht verbunden" statt Fantasiezahlen (siehe Prinzip:
+    erst live bekommen, dann Schritt fuer Schritt korrekt/vollstaendig machen).
+    """
+    import calendar
+
+    current_mk = today.strftime("%Y-%m")
+    entry = snap.get(current_mk, {})
+    days_in_month = calendar.monthrange(today.year, today.month)[1]
+    pacing_pct = round(today.day / days_in_month * 100, 1)
+
+    revenue = entry.get("revenue")
+    deals_won = entry.get("deals_won")
+    total_spend = entry.get("total_spend")  # TODO: GOOGLE_ADS_*/META_* Secrets
+    mer = round(revenue / total_spend, 2) if revenue is not None and total_spend else None
+
+    leads_total = None
+    if leads:
+        top = (leads.get("top_tier") or {}).get("gesamt")
+        sm = (leads.get("sm_leads") or {}).get("gesamt")
+        parts = [v for v in (top, sm) if isinstance(v, (int, float))]
+        if parts:
+            leads_total = sum(parts)
+    cr_pct = round(deals_won / leads_total * 100, 1) if leads_total and deals_won is not None else None
+
+    return {
+        "month_label": f"{MONTHS_DE[today.month - 1]} {today.year}",
+        "day_of_month": today.day,
+        "days_in_month": days_in_month,
+        "pacing_pct": pacing_pct,
+        "revenue": revenue,
+        "deals_won": deals_won,
+        "leads_total": leads_total,
+        "cr_pct": cr_pct,
+        "total_spend": total_spend,
+        "mer": mer,
+        "generated_at": today.isoformat(),
+    }
+
+
+def render_and_encrypt(snap: dict, leads: Optional[dict] = None, hero: Optional[dict] = None):
     html = TEMPLATE_PATH.read_text(encoding="utf-8")
     import re
 
@@ -274,6 +384,22 @@ def render_and_encrypt(snap: dict):
         r'(<script id="snapData"[^>]*>)(.*?)(</script>)',
         lambda m: m.group(1) + snap_json + m.group(3),
         html,
+        flags=re.S,
+    )
+
+    leads_json = json.dumps(leads or {}, ensure_ascii=False)
+    new_html = re.sub(
+        r'(<script id="leadsData"[^>]*>)(.*?)(</script>)',
+        lambda m: m.group(1) + leads_json + m.group(3),
+        new_html,
+        flags=re.S,
+    )
+
+    hero_json = json.dumps(hero or {}, ensure_ascii=False)
+    new_html = re.sub(
+        r'(<script id="heroData"[^>]*>)(.*?)(</script>)',
+        lambda m: m.group(1) + hero_json + m.group(3),
+        new_html,
         flags=re.S,
     )
 
@@ -296,11 +422,25 @@ def render_and_encrypt(snap: dict):
 
 
 def main():
-    rows = load_deal_rows()
+    zoho_drive = fetch_zoho_drive_bundle()
+    rows = load_deal_rows(zoho_drive)
     snap = build_snapdata(rows)
     SNAPDATA_PATH.write_text(json.dumps(snap, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"snapdata.json aktualisiert: {SNAPDATA_PATH} ({len(snap)} Monate)")
-    render_and_encrypt(snap)
+
+    leads = None
+    if zoho_drive:
+        leads = {
+            "top_tier": zoho_drive.get("top_tier"),
+            "sm_leads": zoho_drive.get("sm_leads"),
+            "files_used": {
+                k: v for k, v in zoho_drive.get("files_used", {}).items()
+                if k in ("top_tier", "sm_leads")
+            },
+        }
+
+    hero = build_hero_block(snap, leads, date.today())
+    render_and_encrypt(snap, leads, hero)
 
 
 if __name__ == "__main__":

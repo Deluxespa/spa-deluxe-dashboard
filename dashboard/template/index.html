@@ -144,39 +144,39 @@ canvas{max-height:240px}
   <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;">
     <div>
       <div style="font-size:11px;color:var(--text-muted);font-weight:500;">MER Tracking · Live</div>
-      <div style="font-size:18px;font-weight:600;color:var(--text-primary);margin-top:4px;letter-spacing:-0.2px;">August 2026 · Tag 7/31</div>
+      <div style="font-size:18px;font-weight:600;color:var(--text-primary);margin-top:4px;letter-spacing:-0.2px;" id="heroMonthLabel">–</div>
     </div>
     <div style="text-align:right;">
       <div style="font-size:11px;color:var(--text-muted);font-weight:500;">MER</div>
-      <div style="font-size:36px;font-weight:600;color:#f87171;line-height:1.1;letter-spacing:-1px;font-variant-numeric:tabular-nums;">0.00x</div>
-      <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">⏳ läuft an</div>
+      <div style="font-size:36px;font-weight:600;color:var(--text-muted);line-height:1.1;letter-spacing:-1px;font-variant-numeric:tabular-nums;" id="heroMerValue">–</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:2px;" id="heroMerSub">–</div>
     </div>
   </div>
   <div class="hero-stats-row">
     <div class="hero-stat">
-      <div class="hero-stat-label">Umsatz August</div>
-      <div class="hero-stat-val">€0</div>
-      <div class="hero-stat-sub">aus Excel (Julian)</div>
+      <div class="hero-stat-label" id="heroRevenueLabel">Umsatz</div>
+      <div class="hero-stat-val" id="heroRevenueValue">–</div>
+      <div class="hero-stat-sub" id="heroRevenueSub">–</div>
     </div>
     <div class="hero-stat">
       <div class="hero-stat-label">Marketing-Spend</div>
-      <div class="hero-stat-val">€16.117</div>
-      <div class="hero-stat-sub">Google + Meta + Brand</div>
+      <div class="hero-stat-val" id="heroSpendValue">–</div>
+      <div class="hero-stat-sub" id="heroSpendSub">–</div>
     </div>
     <div class="hero-stat">
       <div class="hero-stat-label">Verkäufe</div>
-      <div class="hero-stat-val">0</div>
-      <div class="hero-stat-sub">0 Leads · CR 0.0%</div>
+      <div class="hero-stat-val" id="heroDealsValue">–</div>
+      <div class="hero-stat-sub" id="heroDealsSub">–</div>
     </div>
     <div class="hero-stat">
       <div class="hero-stat-label">Pacing</div>
-      <div class="hero-stat-val">23%</div>
-      <div style="height:4px;background:var(--neutral-soft);border-radius:2px;margin-top:8px;overflow:hidden;"><div style="height:100%;width:23%;background:var(--text-primary);border-radius:2px;"></div></div>
+      <div class="hero-stat-val" id="heroPacingValue">–</div>
+      <div style="height:4px;background:var(--neutral-soft);border-radius:2px;margin-top:8px;overflow:hidden;"><div id="heroPacingBar" style="height:100%;width:0%;background:var(--text-primary);border-radius:2px;"></div></div>
     </div>
   </div>
   <div style="display:flex;gap:24px;padding-top:14px;margin-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--text-secondary);flex-wrap:wrap;">
-    <span><strong style="color:var(--text-primary);font-weight:600;">Juli Final:</strong> €1.900.655 · 90 Verk. · MER <strong style="color:var(--good);font-weight:600;">11.4x</strong></span>
-    <span><strong style="color:var(--text-primary);font-weight:600;">YTD 2026:</strong> €12.684.289 · 689 Verk. · <strong style="color:var(--cta);font-weight:600;">39%</strong> vom Jahresziel (€11.480.235)</span>
+    <span id="heroJuliFinal"><strong style="color:var(--text-primary);font-weight:600;">Vormonat Final:</strong> noch nicht verbunden</span>
+    <span id="heroYtd"><strong style="color:var(--text-primary);font-weight:600;">YTD 2026:</strong> noch nicht verbunden</span>
   </div>
 </div>
 <!-- ═══════════ ENDE MER TRACKING ═══════════ -->
@@ -298,6 +298,12 @@ canvas{max-height:240px}
   <div class="card"><div class="card-label">Google Ads</div><div class="card-value" style="font-size:22px;">€16.117</div><div class="card-sub">Forecast: €71.375</div></div>
   <div class="card"><div class="card-label">Meta Perf.</div><div class="card-value" style="font-size:22px;">€0</div><div class="card-sub">Forecast: €0</div></div>
   <div class="card"><div class="card-label">Brand</div><div class="card-value" style="font-size:22px;">€0</div><div class="card-sub">Forecast: €0</div></div>
+</div>
+
+<div class="grid-3" style="margin-top:18px;">
+  <div class="card"><div class="card-label">Top-Tier Leads (Zoho)</div><div class="card-value" id="leadsTopTierValue" style="font-size:22px;">–</div><div class="card-sub" id="leadsTopTierSub">–</div></div>
+  <div class="card"><div class="card-label">Social-Media Leads (Zoho)</div><div class="card-value" id="leadsSmValue" style="font-size:22px;">–</div><div class="card-sub" id="leadsSmSub">–</div></div>
+  <div class="card"><div class="card-label">Zoho-Export Stand</div><div class="card-value" id="leadsDateValue" style="font-size:22px;">–</div><div class="card-sub" id="leadsWarning">–</div></div>
 </div>
 
 
@@ -1133,6 +1139,8 @@ new Chart(document.getElementById('spendChart').getContext('2d'),{type:'line',da
 </script>
 
 <script id="snapData" type="application/json">{}</script>
+<script id="leadsData" type="application/json">{}</script>
+<script id="heroData" type="application/json">{}</script>
 <script>
 var SNAPS = JSON.parse(document.getElementById('snapData').textContent);
 var MNAMES = {'01':'Januar','02':'Februar','03':'März','04':'April','05':'Mai','06':'Juni','07':'Juli','08':'August','09':'September','10':'Oktober','11':'November','12':'Dezember'};
@@ -1176,6 +1184,94 @@ function fmt(n) { return '€' + Math.round(n).toLocaleString('de-DE'); }
     elSensNote.textContent = 'Sensitivität: ' + wd.sensitivity_deals_per_c.toFixed(1) + ' Deals pro °C (echte Regression über ' + wd.n_months + ' abgeschlossene Monate)';
   } else {
     elSensNote.textContent = 'Sensitivität: noch nicht genug Monatshistorie (mind. 3 abgeschlossene Monate nötig)';
+  }
+})();
+
+(function(){
+  // Lead-Zahlen aus dem woechentlichen Zoho-CRM-Drive-Export (Top-Tier- und
+  // Social-Media-Leads-CSV). Siehe jobs/weekly_numbers_update.py ->
+  // fetch_zoho_drive_bundle(). Bleibt '–', falls kein Export verfuegbar war.
+  var el = document.getElementById('leadsTopTierValue');
+  if (!el) return;
+  var LEADS = {};
+  try { LEADS = JSON.parse(document.getElementById('leadsData').textContent) || {}; } catch (e) { LEADS = {}; }
+
+  function fillLeadCard(data, valueId, subId) {
+    var valueEl = document.getElementById(valueId);
+    var subEl = document.getElementById(subId);
+    if (!data || data.gesamt == null) {
+      valueEl.textContent = '–';
+      subEl.textContent = 'kein Export verfügbar';
+      return;
+    }
+    valueEl.textContent = data.gesamt;
+    var top = (data.sources || [])
+      .filter(function(s){ return s.quelle && s.anzahl != null; })
+      .sort(function(a, b){ return b.anzahl - a.anzahl; })
+      .slice(0, 2)
+      .map(function(s){ return s.quelle + ' (' + s.anzahl + ')'; })
+      .join(', ');
+    subEl.textContent = top || 'Details siehe Export';
+  }
+
+  fillLeadCard(LEADS.top_tier, 'leadsTopTierValue', 'leadsTopTierSub');
+  fillLeadCard(LEADS.sm_leads, 'leadsSmValue', 'leadsSmSub');
+
+  var dateEl = document.getElementById('leadsDateValue');
+  var warnEl = document.getElementById('leadsWarning');
+  var exportDate = (LEADS.top_tier && LEADS.top_tier.date) || (LEADS.sm_leads && LEADS.sm_leads.date);
+  dateEl.textContent = exportDate || '–';
+  var warnings = [LEADS.top_tier && LEADS.top_tier.warning, LEADS.sm_leads && LEADS.sm_leads.warning].filter(Boolean);
+  warnEl.textContent = warnings.length ? warnings.join(' / ') : (exportDate ? 'Zoho-Drive-Export ok' : 'kein Export verfügbar');
+  if (warnings.length) warnEl.style.color = '#f87171';
+})();
+
+(function(){
+  // "MER Tracking"-Hero-Karte: Umsatz/Verkaeufe/Leads/Pacing sind live aus
+  // Google Sheet + Zoho-CRM-Drive-Export bzw. echtem Datum berechnet (siehe
+  // jobs/weekly_numbers_update.py -> build_hero_block()). Marketing-Spend/MER
+  // sowie Vormonat-Final/YTD sind noch nicht an eine Datenquelle angebunden
+  // (keine Google/Meta-Ads-API, keine historischen Monate in der Live-Pipeline)
+  // und werden ehrlich als "noch nicht verbunden" ausgewiesen statt Fantasiezahlen.
+  var el = document.getElementById('heroMonthLabel');
+  if (!el) return;
+  var HERO = {};
+  try { HERO = JSON.parse(document.getElementById('heroData').textContent) || {}; } catch (e) { HERO = {}; }
+
+  el.textContent = (HERO.month_label || '–') +
+    (HERO.day_of_month && HERO.days_in_month ? ' · Tag ' + HERO.day_of_month + '/' + HERO.days_in_month : '');
+
+  document.getElementById('heroRevenueLabel').textContent = HERO.month_label ? 'Umsatz ' + HERO.month_label.split(' ')[0] : 'Umsatz';
+  document.getElementById('heroRevenueValue').textContent = HERO.revenue != null ? fmt(HERO.revenue) : '–';
+  document.getElementById('heroRevenueSub').textContent = HERO.revenue != null ? 'aus Google Sheet + Zoho CRM (live)' : 'noch keine Deals erfasst';
+
+  document.getElementById('heroDealsValue').textContent = HERO.deals_won != null ? HERO.deals_won : '–';
+  document.getElementById('heroDealsSub').textContent =
+    (HERO.leads_total != null ? HERO.leads_total + ' Leads' : '– Leads') +
+    ' · CR ' + (HERO.cr_pct != null ? HERO.cr_pct.toFixed(1) + '%' : '–');
+
+  document.getElementById('heroPacingValue').textContent = HERO.pacing_pct != null ? HERO.pacing_pct + '%' : '–';
+  document.getElementById('heroPacingBar').style.width = (HERO.pacing_pct != null ? HERO.pacing_pct : 0) + '%';
+
+  var spendEl = document.getElementById('heroSpendValue');
+  var spendSubEl = document.getElementById('heroSpendSub');
+  if (HERO.total_spend != null) {
+    spendEl.textContent = fmt(HERO.total_spend);
+    spendSubEl.textContent = 'Google + Meta + Brand';
+  } else {
+    spendEl.textContent = '–';
+    spendSubEl.textContent = 'noch nicht verbunden';
+  }
+
+  var merEl = document.getElementById('heroMerValue');
+  var merSubEl = document.getElementById('heroMerSub');
+  if (HERO.mer != null) {
+    merEl.textContent = HERO.mer.toFixed(2) + 'x';
+    merEl.style.color = HERO.mer >= 4 ? 'var(--good)' : '#f87171';
+    merSubEl.textContent = HERO.mer >= 4 ? '✅ on track' : '⚠️ unter Ziel';
+  } else {
+    merEl.textContent = '–';
+    merSubEl.textContent = 'Ads-Spend noch nicht verbunden';
   }
 })();
 
