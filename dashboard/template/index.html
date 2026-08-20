@@ -118,20 +118,16 @@ canvas{max-height:240px}
 <div class="page-wrap">
 
 <div class="header">
-  <h1>🔮 <span>Marketing Intelligence Forecast</span> — August 2026</h1>
+  <h1>🔮 <span>Marketing Intelligence Forecast</span> — <span id="headerMonthLabel">–</span></h1>
   <div class="meta"><span class="badge badge-live">● LIVE</span> &nbsp; <span id="headerClock">–</span></div>
 </div>
 
 <div style="margin-bottom:20px;display:flex;align-items:center;gap:12px;">
   <label style="font-size:13px;color:var(--text-muted);">Monat:</label>
-  <select class="month-select" onchange="switchMonth(this.value)">
-    <option value="live" selected>📡 August 2026 (Live)</option>
-    <option value="2026-07">Juli 2026 — 90 Deals, €166,913</option>
-<option value="2026-06">Juni 2026 — 129 Deals, €171,464</option>
-<option value="2026-05">Mai 2026 — 149 Deals, €180,967</option>
-
+  <select class="month-select" id="monthSelect" onchange="switchMonth(this.value)">
+    <option value="live" selected>📡 Live</option>
   </select>
-  <span style="font-size:12px;color:var(--text-muted);">3 Monate im Archiv</span>
+  <span style="font-size:12px;color:var(--text-muted);" id="archiveCount">– Monate im Archiv</span>
 </div>
 
 <div class="dashboard-layout">
@@ -143,7 +139,7 @@ canvas{max-height:240px}
 <div class="hero-mer">
   <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;">
     <div>
-      <div style="font-size:11px;color:var(--text-muted);font-weight:500;">MER Tracking · Live</div>
+      <div style="font-size:11px;color:var(--text-muted);font-weight:500;">MER Tracking · Live <span id="heroStand"></span></div>
       <div style="font-size:18px;font-weight:600;color:var(--text-primary);margin-top:4px;letter-spacing:-0.2px;" id="heroMonthLabel">–</div>
     </div>
     <div style="text-align:right;">
@@ -182,26 +178,10 @@ canvas{max-height:240px}
 <!-- ═══════════ ENDE MER TRACKING ═══════════ -->
 
 <div class="grid">
-  <div class="card" style="border-color:#f8717133;position:relative;">
-    <div class="card-label">Verkäufe — Plan vs. Ist <span class="info-trigger" onclick="this.parentElement.parentElement.querySelector('.info-tooltip').classList.toggle('show')" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:#f8717122;color:#f87171;font-size:11px;font-weight:700;cursor:pointer;margin-left:6px;vertical-align:middle;border:1px solid #f8717144;">ℹ</span></div>
-    <div class="card-value" style="font-size:22px;">3 / 133 <span style="font-size:16px;color:#f87171;">(2%)</span></div>
-    <div style="margin:8px 0 4px;height:10px;background:#27272a;border-radius:5px;position:relative;overflow:visible;">
-      <div style="height:100%;width:2%;background:#f87171;border-radius:5px;transition:width 0.5s;"></div>
-      <div style="position:absolute;top:-3px;left:23%;width:2px;height:16px;background:#fff;border-radius:1px;opacity:0.7;" title="Monatsfortschritt 23%"></div>
-    </div>
-    <div class="card-sub"><span class="down">Gap! (−21pp)</span> &nbsp; <span style="color:var(--text-muted);">Monat: 23% | Plan: 2%</span></div>
-    <div class="info-tooltip" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;margin-top:8px;background:var(--card-bg);border:1px solid var(--border-strong);border-radius:10px;padding:16px;font-size:13px;line-height:1.6;box-shadow:0 8px 24px rgba(0,0,0,0.5);max-width:400px;min-width:280px;">
-      <div style="font-weight:700;color:var(--text-primary);margin-bottom:8px;">🦞 Jean-Clawds Einschätzung</div>
-      <div style="color:var(--text-secondary);margin-bottom:10px;">🟠 WpK bei €1,356 — Grenzbereich. Gap von 21pp zum Plan. Erstmal Budget umschichten, nicht erhöhen.</div>
-      <div style="font-weight:600;color:var(--text-primary);margin-bottom:6px;">Budget-Empfehlung:</div>
-      <div style="color:var(--text-secondary);">⬇️ <b>Ausstellung München</b>: -25%<br><span style='color:var(--text-muted);font-size:11px;'>Budget freimachen: CPA €658</span><br>⬇️ <b>Ausstellung Senden</b>: -25%<br><span style='color:var(--text-muted);font-size:11px;'>Budget freimachen: CPA €947</span><br>⬇️ <b>Display</b>: -25%<br><span style='color:var(--text-muted);font-size:11px;'>Budget freimachen: CPA €740</span><br>🔄 <b>(pmax) Konfi & Inbound Call</b>: +15% (umgeschichtet)<br><span style='color:var(--text-muted);font-size:11px;'>Beste Effizienz: CPA €26, ROAS 5.23x</span><br>🔄 <b>Search: Fisher & Pacific</b>: +15% (umgeschichtet)<br><span style='color:var(--text-muted);font-size:11px;'>Beste Effizienz: CPA €34, ROAS 5.08x</span></div>
-      <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);">Basierend auf WpK, Plan-Gap & Kampagnen-Performance</div>
-    </div>
-  </div>
   <div class="card">
     <div class="card-label">WpK</div>
-    <div class="card-value">€5.372</div>
-    <div class="card-sub">Forecast: <span class="up">€2.855</span> &nbsp; Ziel: €1.000</div>
+    <div class="card-value" id="liveWpkValue">–</div>
+    <div class="card-sub" id="liveWpkSub">–</div>
   </div>
   <div class="card">
     <div class="card-label">Jean-Clawd Daily Insight</div>
@@ -215,35 +195,38 @@ canvas{max-height:240px}
   <div class="card-lg" style="padding:18px 22px;">
     <h3 style="margin-bottom:10px;">📊 Pacing & Lead-Status</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;font-size:13px;">
-      <div><div style="color:var(--text-muted);font-size:11px;letter-spacing:0.5px;text-transform:uppercase;">SM Leads</div><div style="font-size:18px;font-weight:700;color:var(--text-primary);margin-top:3px;">133</div><div style="font-size:11px;color:var(--text-muted);">→ <span style="color:var(--accent);">589</span></div></div>
-      <div><div style="color:var(--text-muted);font-size:11px;letter-spacing:0.5px;text-transform:uppercase;">Top Tier</div><div style="font-size:18px;font-weight:700;color:var(--text-primary);margin-top:3px;">33</div><div style="font-size:11px;color:var(--text-muted);">→ <span style="color:var(--accent);">146</span></div></div>
-      <div><div style="color:var(--text-muted);font-size:11px;letter-spacing:0.5px;text-transform:uppercase;">Google Ads</div><div style="font-size:18px;font-weight:700;color:var(--text-primary);margin-top:3px;">€16.117</div></div>
+      <div><div style="color:var(--text-muted);font-size:11px;letter-spacing:0.5px;text-transform:uppercase;">SM Leads</div><div id="pacingSmValue" style="font-size:18px;font-weight:700;color:var(--text-primary);margin-top:3px;">–</div><div id="pacingSmSub" style="font-size:11px;color:var(--text-muted);"></div></div>
+      <div><div style="color:var(--text-muted);font-size:11px;letter-spacing:0.5px;text-transform:uppercase;">Top Tier</div><div id="pacingTtValue" style="font-size:18px;font-weight:700;color:var(--text-primary);margin-top:3px;">–</div><div id="pacingTtSub" style="font-size:11px;color:var(--text-muted);"></div></div>
+      <div><div style="color:var(--text-muted);font-size:11px;letter-spacing:0.5px;text-transform:uppercase;">Google Ads</div><div id="pacingGadsValue" style="font-size:18px;font-weight:700;color:var(--text-primary);margin-top:3px;">–</div></div>
       <div><div style="color:var(--text-muted);font-size:11px;letter-spacing:0.5px;text-transform:uppercase;">Meta + Brand</div><div style="font-size:18px;font-weight:700;color:var(--text-primary);margin-top:3px;">€0</div></div>
     </div>
+    <div id="pacingStand" style="font-size:11px;color:var(--text-muted);margin-top:10px;"></div>
   </div>
   <div class="card-lg">
     <h3>🧠 Signal-Gewichtung → Deals</h3>
-    <div class="signal-bar"><div class="signal-name">Pacing</div><div class="signal-track"><div class="signal-fill" style="width:38%;background:linear-gradient(90deg,#818cf8,#6366f1);">19%</div></div><div class="signal-val">13 Deals</div></div>
-    <div class="signal-bar"><div class="signal-name">Saison</div><div class="signal-track"><div class="signal-fill" style="width:10%;background:linear-gradient(90deg,#a78bfa,#7c3aed);">5%</div></div><div class="signal-val">78 Deals</div></div>
-    <div class="signal-bar"><div class="signal-name">Wetter</div><div class="signal-track"><div class="signal-fill" style="width:10%;background:linear-gradient(90deg,#fbbf24,#f59e0b);">5%</div></div><div class="signal-val">128 Deals</div></div>
-    <div class="signal-bar"><div class="signal-name">SEO</div><div class="signal-track"><div class="signal-fill" style="width:22%;background:linear-gradient(90deg,#34d399,#10b981);">11%</div></div><div class="signal-val">16 Deals</div></div>
-    <div class="signal-bar"><div class="signal-name">Ads-Effizienz</div><div class="signal-track"><div class="signal-fill" style="width:38%;background:linear-gradient(90deg,#f87171,#ef4444);">19%</div></div><div class="signal-val">13 Deals</div></div>
-    <div class="signal-bar"><div class="signal-name">Sales Cycle</div><div class="signal-track"><div class="signal-fill" style="width:36%;background:linear-gradient(90deg,#38bdf8,#0284c7);">18%</div></div><div class="signal-val">13 Deals</div></div>
-    
-    <div class="ensemble-row"><span style="font-size:14px;font-weight:700;color:var(--text-primary);">🎯 Gewichtetes Ergebnis</span><span style="font-size:22px;font-weight:700;color:var(--accent);">25 Deals</span></div>
+    <div class="signal-bar"><div class="signal-name">Pacing</div><div class="signal-track"><div class="signal-fill" id="sigFill_pacing" style="width:0%;background:linear-gradient(90deg,#818cf8,#6366f1);"></div></div><div class="signal-val" id="sigVal_pacing">–</div></div>
+    <div class="signal-bar"><div class="signal-name">Saison</div><div class="signal-track"><div class="signal-fill" id="sigFill_saisonalitaet" style="width:0%;background:linear-gradient(90deg,#a78bfa,#7c3aed);"></div></div><div class="signal-val" id="sigVal_saisonalitaet">–</div></div>
+    <div class="signal-bar"><div class="signal-name">Wetter</div><div class="signal-track"><div class="signal-fill" id="sigFill_wetter" style="width:0%;background:linear-gradient(90deg,#fbbf24,#f59e0b);"></div></div><div class="signal-val" id="sigVal_wetter">–</div></div>
+    <div class="signal-bar"><div class="signal-name">SEO</div><div class="signal-track"><div class="signal-fill" id="sigFill_seo" style="width:0%;background:linear-gradient(90deg,#34d399,#10b981);"></div></div><div class="signal-val" id="sigVal_seo">–</div></div>
+    <div class="signal-bar"><div class="signal-name">Ads-Effizienz</div><div class="signal-track"><div class="signal-fill" id="sigFill_ads_effizienz" style="width:0%;background:linear-gradient(90deg,#f87171,#ef4444);"></div></div><div class="signal-val" id="sigVal_ads_effizienz">–</div></div>
+    <div class="signal-bar"><div class="signal-name">Sales Cycle</div><div class="signal-track"><div class="signal-fill" id="sigFill_sales_cycle" style="width:0%;background:linear-gradient(90deg,#38bdf8,#0284c7);"></div></div><div class="signal-val" id="sigVal_sales_cycle">–</div></div>
+
+    <div class="ensemble-row"><span style="font-size:14px;font-weight:700;color:var(--text-primary);">🎯 Gewichtetes Ergebnis</span><span style="font-size:22px;font-weight:700;color:var(--accent);" id="sigEnsembleResult">–</span></div>
   </div>
 </div>
 
 <div class="grid-2">
   <div class="card-lg">
-    <h3>📅 Deals pro Monat — 2025 vs. 2026</h3>
+    <h3 id="dealsChartTitle">📅 Deals pro Monat</h3>
     <canvas id="dealsChart"></canvas>
-    <div class="chart-legend"><span><span class="dot" style="background:#cbd5e1;"></span> 2025</span><span><span class="dot" style="background:#0f172a;"></span> 2026 Ist</span><span><span class="dot" style="background:#fff;border:1.5px dashed #0f172a;"></span> Forecast</span></div>
+    <div class="chart-legend"><span><span class="dot" style="background:#cbd5e1;"></span> <span id="dealsLegendPrevYear">Vorjahr</span></span><span><span class="dot" style="background:#0f172a;"></span> <span id="dealsLegendCurYear">Aktuelles Jahr</span> Ist</span><span><span class="dot" style="background:#fff;border:1.5px dashed #0f172a;"></span> Forecast</span></div>
+    <div id="dealsChartStand" style="font-size:11px;color:var(--text-muted);margin-top:6px;"></div>
   </div>
   <div class="card-lg">
     <h3>💰 Total Spend pro Monat</h3>
     <canvas id="spendChart"></canvas>
     <div class="chart-legend"><span><span class="dot" style="background:#cbd5e1;"></span> 2025</span><span><span class="dot" style="background:#0f172a;"></span> 2026 Ist</span><span><span class="dot" style="background:#fff;border:1.5px dashed #0f172a;"></span> Forecast</span></div>
+    <div id="spendChartStand" style="font-size:11px;color:var(--text-muted);margin-top:6px;"></div>
   </div>
 </div>
 
@@ -264,15 +247,15 @@ canvas{max-height:240px}
   <div class="card-lg">
     <h3>🔍 SEO-Signal</h3>
     <div class="weather-strip">
-      <div class="weather-item"><div class="wi-val" style="color:var(--accent);">1.2949</div><div class="wi-label">SI aktuell</div></div>
-      <div style="color:#27272a;font-size:24px;">↑</div>
-      <div class="weather-item"><div class="wi-val">0.6299</div><div class="wi-label">Vorjahr</div></div>
-      <div style="color:#27272a;font-size:24px;">=</div>
-      <div class="weather-item"><div class="wi-val" style="color:#4ade80;">+106%</div><div class="wi-label">Wachstum</div></div>
-      <div style="color:#27272a;font-size:24px;">→</div>
-      <div class="weather-item"><div class="wi-val" style="color:#34d399;">1.211x</div><div class="wi-label">Boost</div></div>
+      <div class="weather-item"><div class="wi-val">–</div><div class="wi-label">SI aktuell</div></div>
+      <div style="color:#27272a;font-size:24px;">–</div>
+      <div class="weather-item"><div class="wi-val">–</div><div class="wi-label">Vorjahr</div></div>
+      <div style="color:#27272a;font-size:24px;">–</div>
+      <div class="weather-item"><div class="wi-val">–</div><div class="wi-label">Wachstum</div></div>
+      <div style="color:#27272a;font-size:24px;">–</div>
+      <div class="weather-item"><div class="wi-val">–</div><div class="wi-label">Boost</div></div>
     </div>
-    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Mehr Sichtbarkeit → mehr organischer Traffic → mehr Leads ohne Adspend</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">⚠️ Noch nicht live verbunden (SISTRIX_API_KEY fehlt) · Signal wird im Forecast übersprungen</div>
   </div>
 </div>
 
@@ -280,24 +263,18 @@ canvas{max-height:240px}
   <h3>🔬 Signal-Details</h3>
   <div style="overflow-x:auto;">
     <table>
-      <thead><tr><th>Signal</th><th>Insight</th><th class="num">Deals FC</th><th class="num">Gewicht</th><th>Konfidenz</th></tr></thead>
-      <tbody>
-        <tr><td>📈 Pacing</td><td>3 Deals in 7 Tagen → linear auf 31 Tage</td><td class="num highlight">13</td><td class="num">19%</td><td><span class="pill pill-green">Hoch</span></td></tr>
-        <tr><td>📅 Saisonalität</td><td>Vorjahr: 113 Deals bei €150.707 Spend · YoY: 0.474x</td><td class="num highlight">78</td><td class="num">5%</td><td><span class="pill pill-blue">Mittel</span></td></tr>
-        <tr><td>🌤️ Wetter</td><td>+4.5°C vs. Vorjahr · 3.4 Deals/°C</td><td class="num highlight">128</td><td class="num">5%</td><td><span class="pill pill-amber">Experimentell</span></td></tr>
-        <tr><td>🔍 SEO</td><td>SI 0.6299 → 1.2949 (+106%) · Boost: 1.211x</td><td class="num highlight">16</td><td class="num">11%</td><td><span class="pill pill-blue">Mittel</span></td></tr>
-        <tr><td>💸 Ads-Effizienz</td><td>CPC-Veränderung vs. Vorjahr</td><td class="num highlight">13</td><td class="num">19%</td><td><span class="pill pill-blue">Mittel</span></td></tr>
-        <tr><td>⏱️ Sales Cycle</td><td>Median 19d · Cycle Factor: 1.0</td><td class="num highlight">13</td><td class="num">18%</td><td><span class="pill pill-green">Hoch</span></td></tr>
-        
+      <thead><tr><th>Signal</th><th>Insight</th><th class="num">Wert</th><th class="num">Basis-Gewicht</th><th>Status</th></tr></thead>
+      <tbody id="signalDetailsBody">
+        <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Lade…</td></tr>
       </tbody>
     </table>
   </div>
 </div>
 
 <div class="grid-3">
-  <div class="card"><div class="card-label">Google Ads</div><div class="card-value" style="font-size:22px;">€16.117</div><div class="card-sub">Forecast: €71.375</div></div>
-  <div class="card"><div class="card-label">Meta Perf.</div><div class="card-value" style="font-size:22px;">€0</div><div class="card-sub">Forecast: €0</div></div>
-  <div class="card"><div class="card-label">Brand</div><div class="card-value" style="font-size:22px;">€0</div><div class="card-sub">Forecast: €0</div></div>
+  <div class="card"><div class="card-label">Google Ads</div><div class="card-value" id="chGoogleAdsValue" style="font-size:22px;">–</div><div class="card-sub" id="chGoogleAdsSub">–</div></div>
+  <div class="card"><div class="card-label">Meta Perf.</div><div class="card-value" id="chMetaValue" style="font-size:22px;">–</div><div class="card-sub" id="chMetaSub">–</div></div>
+  <div class="card"><div class="card-label">Brand</div><div class="card-value" id="chBrandValue" style="font-size:22px;">–</div><div class="card-sub" id="chBrandSub">–</div></div>
 </div>
 
 <div class="grid-3" style="margin-top:18px;">
@@ -309,28 +286,28 @@ canvas{max-height:240px}
 
 <div class="card-lg" style="margin-bottom:18px;">
   <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;">
-    🏢 Vertriebs-Performance (live aus Excel)
-    <span style="font-size:11px; font-weight:normal; color:var(--text-secondary); margin-left:auto;">aktualisiert: 2026-08-03 06:55</span>
+    🏢 Vertriebs-Performance (Filialebene)
+    <span style="font-size:11px; font-weight:normal; color:var(--text-secondary); margin-left:auto;">⚠️ Noch nicht live verbunden (Filial-Excel-Import fehlt)</span>
   </h3>
   <div class="grid-3" style="margin-bottom:20px;">
     <div class="card">
-      <div class="card-label">August Brutto</div>
-      <div class="card-value" style="font-size:22px;">€0</div>
-      <div class="card-sub" style="color:#f87171;">vs. Vorjahr: –</div>
+      <div class="card-label" id="vpBruttoLabel">Brutto</div>
+      <div class="card-value" style="font-size:22px;">–</div>
+      <div class="card-sub" style="color:var(--text-secondary);">vs. Vorjahr: –</div>
     </div>
     <div class="card">
-      <div class="card-label">August Verkäufe</div>
-      <div class="card-value" style="font-size:22px;">0</div>
-      <div class="card-sub">CR 0.0% von 0 Leads</div>
+      <div class="card-label" id="vpDealsLabel">Verkäufe</div>
+      <div class="card-value" style="font-size:22px;">–</div>
+      <div class="card-sub">CR – % von – Leads</div>
     </div>
     <div class="card">
-      <div class="card-label">YTD 2026</div>
-      <div class="card-value" style="font-size:22px;">€12.684.289</div>
-      <div class="card-sub">689 Verkäufe</div>
+      <div class="card-label" id="vpYtdLabel">YTD</div>
+      <div class="card-value" style="font-size:22px;">–</div>
+      <div class="card-sub">– Verkäufe</div>
     </div>
   </div>
 
-  <h4 style="margin:16px 0 8px 0;">📍 Filial-Performance August</h4>
+  <h4 style="margin:16px 0 8px 0;" id="vpFilialHeading">📍 Filial-Performance</h4>
   <div style="overflow-x:auto;">
   <table style="width:100%; border-collapse:collapse; font-size:13px;">
     <thead>
@@ -419,20 +396,21 @@ canvas{max-height:240px}
 
   <div class="grid-2" style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:16px;">
     <div>
-      <h4 style="margin:16px 0 8px 0;">🏆 Top Verkäufer August</h4>
+      <h4 style="margin:16px 0 8px 0;" id="topSellerHeading">🏆 Top Verkäufer</h4>
       <table style="width:100%; border-collapse:collapse; font-size:13px;">
         <thead>
           <tr style="color:var(--text-secondary); text-align:left;">
             <th style="padding:8px 12px; border-bottom:2px solid rgba(255,255,255,0.1);">Verkäufer</th>
-            <th style="padding:8px 12px; border-bottom:2px solid rgba(255,255,255,0.1); text-align:right;">August</th>
+            <th style="padding:8px 12px; border-bottom:2px solid rgba(255,255,255,0.1); text-align:right;" id="topSellerMonthCol">Monat</th>
             <th style="padding:8px 12px; border-bottom:2px solid rgba(255,255,255,0.1); text-align:right;">YTD</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">⚠️ Noch nicht live verbunden (keine Verkäufer-Datenquelle im System) · Rangliste pro Verkäufer erfordert eine Anbindung an Julians Excel bzw. Zoho mit Verkäufer-Zuordnung je Deal.</div>
     </div>
     <div>
-      <h4 style="margin:16px 0 8px 0;">🏷️ Hersteller-Mix August</h4>
+      <h4 style="margin:16px 0 8px 0;" id="brandMixHeading">🏷️ Hersteller-Mix</h4>
       <table style="width:100%; border-collapse:collapse; font-size:13px;">
         <thead>
           <tr style="color:var(--text-secondary); text-align:left;">
@@ -443,6 +421,7 @@ canvas{max-height:240px}
         </thead>
         <tbody></tbody>
       </table>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">⚠️ Noch nicht live verbunden (keine Hersteller-/Produktmix-Datenquelle im System) · Stück-/Anteils-Auswertung je Marke erfordert eine Anbindung an Julians Excel mit Produkt-/Hersteller-Feld je Auftrag.</div>
     </div>
   </div>
 </div>
@@ -450,9 +429,9 @@ canvas{max-height:240px}
 
 
 <div class="card-lg" style="margin-bottom:18px;">
-  <h3 style="margin-top:0;">📈 Ausstellung Marketing-MER <span style="color:#4ade80;">(True)</span></h3>
+  <h3 style="margin-top:0;">📈 Marketing-MER pro Filiale</h3>
   <p style="color:var(--text-secondary); font-size:13px; margin:4px 0 16px 0;">
-    Echter MER (Marketing Efficiency Ratio) basierend auf tatsächlichem Filial-Umsatz (Julians Excel) gegen Marketing-Spend — <strong>August 2026</strong>.
+    Echter MER (Marketing Efficiency Ratio) basierend auf tatsächlichem Filial-Umsatz (Julians Excel) gegen Marketing-Spend — <strong id="merFilialePeriod">–</strong>.
     <br>Schließt Brand- und Job-Kampagnen aus. Frankfurt-Kampagnen → Rüsselsheim, Nürnberg-Kampagnen → Fürth (lokale Zuordnung).
   </p>
   <div style="overflow-x:auto;">
@@ -470,71 +449,71 @@ canvas{max-height:240px}
     </thead>
     <tbody>
         <tr>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">🥇 Fürth</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-size:12px; color:var(--text-secondary);">€1.278 / €0</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">€1.278</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">€0</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">Fürth</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-size:12px; color:var(--text-secondary);">– / –</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">–</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">–</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">–</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">–</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">–</td>
+        </tr>
+
+        <tr>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">Senden</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-size:12px; color:var(--text-secondary);">– / –</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">–</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">–</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">–</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">–</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">–</td>
+        </tr>
+
+        <tr>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">München</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-size:12px; color:var(--text-secondary);">– / –</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">–</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">–</td>
           <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">–</td>
           <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">0</td>
           <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">–</td>
         </tr>
         
         <tr>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">🥈 Senden</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-size:12px; color:var(--text-secondary);">€1.407 / €0</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">€1.407</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">€0</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">Esslingen</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-size:12px; color:var(--text-secondary);">– / –</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">–</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">–</td>
           <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">–</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">0</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">–</td>
           <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">–</td>
         </tr>
         
         <tr>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">🥉 München</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-size:12px; color:var(--text-secondary);">€1.018 / €0</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">€1.018</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">€0</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">Rüsselsheim</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-size:12px; color:var(--text-secondary);">– / –</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">–</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">–</td>
           <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">–</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">0</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">–</td>
           <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">–</td>
         </tr>
         
         <tr>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">  Esslingen</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-size:12px; color:var(--text-secondary);">€1.390 / €0</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">€1.390</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">€0</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">Hamburg</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-size:12px; color:var(--text-secondary);">– / –</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">–</td>
+          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">–</td>
           <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">–</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">0</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">–</td>
-        </tr>
-        
-        <tr>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">  Rüsselsheim</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-size:12px; color:var(--text-secondary);">€1.335 / €0</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">€1.335</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">€0</td>
           <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">–</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">0</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">–</td>
-        </tr>
-        
-        <tr>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">  Hamburg</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-size:12px; color:var(--text-secondary);">€1.285 / €0</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">€1.285</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; font-weight:600;">€0</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">–</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">0</td>
           <td style="padding:10px 12px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">–</td>
         </tr>
         </tbody>
     <tfoot>
       <tr style="font-weight:700; background:var(--neutral-soft);">
         <td style="padding:12px;">Σ TOTAL</td>
-        <td style="padding:12px; text-align:right; color:var(--text-secondary); font-size:12px;">€7.713 / €0</td>
-        <td style="padding:12px; text-align:right;">€7.713</td>
-        <td style="padding:12px; text-align:right;">€0</td>
+        <td style="padding:12px; text-align:right; color:var(--text-secondary); font-size:12px;">– / –</td>
+        <td style="padding:12px; text-align:right;">–</td>
+        <td style="padding:12px; text-align:right;">–</td>
         <td style="padding:12px; text-align:right; color:#4ade80;">–</td>
         <td style="padding:12px; text-align:right;">0</td>
         <td style="padding:12px; text-align:right; color:var(--text-secondary);">–</td>
@@ -550,388 +529,23 @@ canvas{max-height:240px}
 
 
 <div class="card-lg" style="margin-bottom:18px;">
-  <h3 style="margin-top:0;">📊 Leads & AdSpend — Jahresvergleich 2025 vs. 2026</h3>
+  <h3 style="margin-top:0;">📊 Leads & AdSpend — Jahresvergleich</h3>
   <p style="color:var(--text-secondary); font-size:13px; margin:4px 0 16px 0;">
-    Aus Notion Weekly Numbers (Leads + Spend) + Julians Excel (Umsatz). Aktueller Monat wird basierend auf MTD hochgerechnet.
+    ⚠️ Noch nicht live verbunden (keine Notion-Integration im System) · Monatliche Leads-/AdSpend-Historie im Jahresvergleich wird angezeigt, sobald eine echte Datenquelle angebunden ist.
   </p>
-
-  <div class="grid-3" style="margin-bottom:20px;">
-    <div class="card">
-      <div class="card-label">YTD SM Leads</div>
-      <div class="card-value" style="font-size:22px;">4,141</div>
-      <div class="card-sub">2025: 4,980 • <span style="color:#f87171;">-16.8%</span></div>
-    </div>
-    <div class="card">
-      <div class="card-label">YTD Top Tier</div>
-      <div class="card-value" style="font-size:22px;">1,708</div>
-      <div class="card-sub">2025: 1,931 • <span style="color:#f87171;">-11.5%</span></div>
-    </div>
-    <div class="card">
-      <div class="card-label">YTD AdSpend</div>
-      <div class="card-value" style="font-size:22px;">€975k</div>
-      <div class="card-sub">2025: €944k • <span style="color:#4ade80;">+3.2%</span></div>
-    </div>
-  </div>
-
-  <canvas id="leadTrendChart" style="max-height:320px; margin-bottom:20px;"></canvas>
-
-  <h4 style="margin:16px 0 8px 0;">Monatliche Gegenüberstellung</h4>
-  <p style="color:var(--text-muted); font-size:11px; margin:0 0 8px 0;">Aktueller Monat wird auf Monatsende hochgerechnet (Prognose). Vergangene Monate zeigen Ist-Werte.</p>
-  <div style="overflow-x:auto;">
-  <table style="width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed;">
-    <colgroup>
-      <col style="width:13%;">
-      <col style="width:9.66%;"><col style="width:9.66%;"><col style="width:9.66%;">
-      <col style="width:9.66%;"><col style="width:9.66%;"><col style="width:9.66%;">
-      <col style="width:9.66%;"><col style="width:9.66%;"><col style="width:9.66%;">
-    </colgroup>
-    <thead>
-      <tr style="color:var(--text-secondary);">
-        <th rowspan="2" style="padding:10px; border-bottom:2px solid rgba(255,255,255,0.1); text-align:left; vertical-align:middle;">Monat</th>
-        <th colspan="3" style="padding:10px; border-bottom:2px solid rgba(255,255,255,0.1); color:#60a5fa; text-align:center;">SM Leads</th>
-        <th colspan="3" style="padding:10px; border-bottom:2px solid rgba(255,255,255,0.1); color:#a78bfa; text-align:center;">Top Tier</th>
-        <th colspan="3" style="padding:10px; border-bottom:2px solid rgba(255,255,255,0.1); color:#fbbf24; text-align:center;">AdSpend</th>
-      </tr>
-      <tr style="color:var(--text-muted); font-weight:400; font-size:11px;">
-        <th style="padding:4px 10px; border-bottom:1px solid rgba(255,255,255,0.1); text-align:right;">2025</th>
-        <th style="padding:4px 10px; border-bottom:1px solid rgba(255,255,255,0.1); text-align:right;">2026</th>
-        <th style="padding:4px 10px; border-bottom:1px solid rgba(255,255,255,0.1); text-align:right;">Δ</th>
-        <th style="padding:4px 10px; border-bottom:1px solid rgba(255,255,255,0.1); text-align:right;">2025</th>
-        <th style="padding:4px 10px; border-bottom:1px solid rgba(255,255,255,0.1); text-align:right;">2026</th>
-        <th style="padding:4px 10px; border-bottom:1px solid rgba(255,255,255,0.1); text-align:right;">Δ</th>
-        <th style="padding:4px 10px; border-bottom:1px solid rgba(255,255,255,0.1); text-align:right;">2025</th>
-        <th style="padding:4px 10px; border-bottom:1px solid rgba(255,255,255,0.1); text-align:right;">2026</th>
-        <th style="padding:4px 10px; border-bottom:1px solid rgba(255,255,255,0.1); text-align:right;">Δ</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">Januar</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">444</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">426</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#f87171; font-weight:600;">-4.1%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">150</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">157</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#4ade80; font-weight:600;">+4.7%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary); white-space:nowrap;">€59k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; white-space:nowrap;">€95k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#4ade80; font-weight:600;">+61.0%</span></td>
-        </tr>
-        
-        <tr>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">Februar</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">405</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">459</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#4ade80; font-weight:600;">+13.3%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">125</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">181</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#4ade80; font-weight:600;">+44.8%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary); white-space:nowrap;">€75k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; white-space:nowrap;">€99k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#4ade80; font-weight:600;">+31.6%</span></td>
-        </tr>
-        
-        <tr>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">März</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">698</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">621</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#f87171; font-weight:600;">-11.0%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">232</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">231</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#f87171; font-weight:600;">-0.4%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary); white-space:nowrap;">€123k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; white-space:nowrap;">€130k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#4ade80; font-weight:600;">+6.1%</span></td>
-        </tr>
-        
-        <tr>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">April</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">872</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">512</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#f87171; font-weight:600;">-41.3%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">247</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">214</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#f87171; font-weight:600;">-13.4%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary); white-space:nowrap;">€139k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; white-space:nowrap;">€130k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#f87171; font-weight:600;">-6.0%</span></td>
-        </tr>
-        
-        <tr>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">Mai</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">688</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">693</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#4ade80; font-weight:600;">+0.7%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">220</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">293</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#4ade80; font-weight:600;">+33.2%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary); white-space:nowrap;">€128k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; white-space:nowrap;">€168k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#4ade80; font-weight:600;">+31.0%</span></td>
-        </tr>
-        
-        <tr>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">Juni</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">656</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">618</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#f87171; font-weight:600;">-5.8%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">310</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">354</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#4ade80; font-weight:600;">+14.2%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary); white-space:nowrap;">€134k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; white-space:nowrap;">€171k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#4ade80; font-weight:600;">+27.8%</span></td>
-        </tr>
-        
-        <tr>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">Juli</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">674</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">702</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#4ade80; font-weight:600;">+4.2%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">293</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">251</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#f87171; font-weight:600;">-14.3%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary); white-space:nowrap;">€136k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; white-space:nowrap;">€167k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#4ade80; font-weight:600;">+23.1%</span></td>
-        </tr>
-        
-        <tr>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:600;">August <span style="color:#fbbf24; font-size:10px;" title="Ist-Stand heute (Tag 6/31): SM 110 · TT 27 · €13,751">(Prognose, Tag 6/31)</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">543</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">568</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#4ade80; font-weight:600;">+4.6%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">354</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">139</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#f87171; font-weight:600;">-60.7%</span></td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary); white-space:nowrap;">€151k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; white-space:nowrap;">€71k</td>
-          <td style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#f87171; font-weight:600;">-52.8%</span></td>
-        </tr>
-        </tbody>
-    
-    <tfoot>
-      <tr style="background:rgba(255,255,255,0.04); font-weight:600;">
-        <td style="padding:12px 10px; border-top:2px solid rgba(255,255,255,0.15);">
-          Σ 8 Mon. *
-        </td>
-        <td style="padding:12px 10px; border-top:2px solid rgba(255,255,255,0.15); text-align:right; color:var(--text-secondary);">4,980</td>
-        <td style="padding:12px 10px; border-top:2px solid rgba(255,255,255,0.15); text-align:right;">4,599</td>
-        <td style="padding:12px 10px; border-top:2px solid rgba(255,255,255,0.15); text-align:right;"><span style="color:#f87171; font-weight:700;">-7.7%</span></td>
-        <td style="padding:12px 10px; border-top:2px solid rgba(255,255,255,0.15); text-align:right; color:var(--text-secondary);">1,931</td>
-        <td style="padding:12px 10px; border-top:2px solid rgba(255,255,255,0.15); text-align:right;">1,820</td>
-        <td style="padding:12px 10px; border-top:2px solid rgba(255,255,255,0.15); text-align:right;"><span style="color:#f87171; font-weight:700;">-5.7%</span></td>
-        <td style="padding:12px 10px; border-top:2px solid rgba(255,255,255,0.15); text-align:right; color:var(--text-secondary); white-space:nowrap;">€944k</td>
-        <td style="padding:12px 10px; border-top:2px solid rgba(255,255,255,0.15); text-align:right; white-space:nowrap;">€1.032k</td>
-        <td style="padding:12px 10px; border-top:2px solid rgba(255,255,255,0.15); text-align:right;"><span style="color:#4ade80; font-weight:700;">+9.3%</span></td>
-      </tr>
-    </tfoot>
-    
-  </table>
-  <p style="color:var(--text-muted); font-size:11px; margin:6px 0 0 0;">* inkl. April-Hochrechnung</p>
-  </div>
 </div>
-
-<script>
-(function() {
-  const ctx = document.getElementById('leadTrendChart');
-  if (!ctx) return;
-  const data = {"labels": ["Jan", "Feb", "M\u00e4r", "Apr", "Mai", "Jun", "Jul", "Aug"], "sm_2025": [444, 405, 698, 872, 688, 656, 674, 543], "sm_2026": [426, 459, 621, 512, 693, 618, 702, 568], "tt_2025": [150, 125, 232, 247, 220, 310, 293, 354], "tt_2026": [157, 181, 231, 214, 293, 354, 251, 139], "spend_2025": [59178.0, 75144.0, 122707.0, 138536.0, 128242.0, 134129.0, 135595.0, 150637.0], "spend_2026": [95266.0, 98867.0, 130220.0, 130242.0, 167986.0, 171464.0, 166913.0, 71048.0]};
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: data.labels,
-      datasets: [
-        {label: 'SM Leads 2025', data: data.sm_2025, borderColor: 'rgba(96,165,250,0.4)', backgroundColor: 'transparent', borderDash:[5,5], tension:0.3, yAxisID:'y-leads'},
-        {label: 'SM Leads 2026', data: data.sm_2026, borderColor: '#60a5fa', backgroundColor: 'rgba(96,165,250,0.1)', borderWidth:2, tension:0.3, yAxisID:'y-leads'},
-        {label: 'Top Tier 2025', data: data.tt_2025, borderColor: 'rgba(167,139,250,0.4)', backgroundColor: 'transparent', borderDash:[5,5], tension:0.3, yAxisID:'y-leads'},
-        {label: 'Top Tier 2026', data: data.tt_2026, borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,0.1)', borderWidth:2, tension:0.3, yAxisID:'y-leads'},
-        {label: 'AdSpend 2025', data: data.spend_2025, borderColor: 'rgba(251,191,36,0.4)', backgroundColor: 'transparent', borderDash:[5,5], tension:0.3, yAxisID:'y-spend'},
-        {label: 'AdSpend 2026', data: data.spend_2026, borderColor: '#fbbf24', backgroundColor: 'rgba(251,191,36,0.1)', borderWidth:2, tension:0.3, yAxisID:'y-spend'}
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: {mode:'index', intersect:false},
-      scales: {
-        'y-leads': {position:'left', title:{display:true, text:'Leads', color:'var(--text-secondary)'}, ticks:{color:'var(--text-secondary)'}, grid:{color:'rgba(255,255,255,0.05)'}},
-        'y-spend': {position:'right', title:{display:true, text:'AdSpend €', color:'var(--text-secondary)'}, ticks:{color:'var(--text-secondary)', callback:v=>(v/1000)+'k'}, grid:{display:false}},
-        x: {ticks:{color:'var(--text-secondary)'}, grid:{color:'rgba(255,255,255,0.05)'}}
-      },
-      plugins: {
-        legend: {labels:{color:'#d4d4d8', font:{size:11}}}
-      }
-    }
-  });
-})();
-</script>
 
 
 
 <div class="card-lg" style="margin-bottom:18px;">
   <h3 style="margin-top:0; display:flex; align-items:center; gap:10px;">
     🎯 Top-Tier-Lead-Quellen — Conversion zu Sale
-    <span style="font-size:11px; font-weight:normal; color:var(--text-secondary); margin-left:auto;">aus Zoho CRM · 2026-08-06 11:02</span>
   </h3>
   <p style="color:var(--text-secondary); font-size:13px; margin:4px 0 16px 0;">
-    Welche Lead-Quellen werden tatsächlich zu Verkäufen? Basis: alle Top-Tier-Leads seit Januar 2025 mit gesetzter <code style="background:var(--neutral-soft); padding:1px 4px; border-radius:3px;">lead_quelle</code>-Property.
-    16,388 Contacts gesamt analysiert.
+    ⚠️ Noch nicht live verbunden · Conversion je Lead-Quelle (Ausstellungsbesuch, Inbound Call, Konfigurator, Kontaktformular, Quiz) erfordert eine Verknüpfung von Zoho-Lead-Quelle mit gewonnenen Deals — diese Auswertung ist noch nicht an eine Datenpipeline angebunden, daher hier keine Zahlen statt Fantasiewerten.
   </p>
-
-  <div style="overflow-x:auto;">
-  <table style="width:100%; border-collapse:collapse; font-size:13px;">
-    <thead>
-      <tr style="color:var(--text-secondary); text-align:left;">
-        <th style="padding:10px 12px; border-bottom:2px solid rgba(255,255,255,0.1);">Conversion-Typ</th>
-        <th style="padding:10px 12px; border-bottom:2px solid rgba(255,255,255,0.1); text-align:right;">Leads</th>
-        <th style="padding:10px 12px; border-bottom:2px solid rgba(255,255,255,0.1); text-align:right;">Sales</th>
-        <th style="padding:10px 12px; border-bottom:2px solid rgba(255,255,255,0.1); text-align:right;">Pipeline</th>
-        <th style="padding:10px 12px; border-bottom:2px solid rgba(255,255,255,0.1); text-align:right;">CR</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); font-weight:600;">🥇 <span style="color:#4ade80;">●</span> Ausstellungsbesuch</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right;">1.763</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right;">671</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right; color:var(--text-secondary);">448</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right; font-weight:700; color:#4ade80;">38.1%</td>
-        </tr>
-        
-        <tr>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); font-weight:600;">🥈 <span style="color:#60a5fa;">●</span> Inbound Call</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right;">1.129</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right;">291</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right; color:var(--text-secondary);">198</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right; font-weight:700; color:#4ade80;">25.8%</td>
-        </tr>
-        
-        <tr>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); font-weight:600;">🥉 <span style="color:#a78bfa;">●</span> Konfigurator</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right;">729</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right;">167</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right; color:var(--text-secondary);">112</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right; font-weight:700; color:#fbbf24;">22.9%</td>
-        </tr>
-        
-        <tr>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); font-weight:600;">4️⃣ <span style="color:#fbbf24;">●</span> Kontaktformular</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right;">526</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right;">52</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right; color:var(--text-secondary);">31</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right; font-weight:700; color:#f87171;">9.9%</td>
-        </tr>
-        
-        <tr>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); font-weight:600;">5️⃣ <span style="color:#f472b6;">●</span> Quiz</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right;">269</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right;">11</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right; color:var(--text-secondary);">12</td>
-          <td style="padding:10px 12px; border-bottom:1px solid rgba(255.255.255.0.05); text-align:right; font-weight:700; color:#f87171;">4.1%</td>
-        </tr>
-        </tbody>
-    <tfoot>
-      <tr style="font-weight:700; background:var(--neutral-soft);">
-        <td style="padding:12px;">Σ TOTAL</td>
-        <td style="padding:12px; text-align:right;">4,416</td>
-        <td style="padding:12px; text-align:right;">1,192</td>
-        <td style="padding:12px; text-align:right; color:var(--text-secondary);">801</td>
-        <td style="padding:12px; text-align:right; color:#4ade80;">27.0%</td>
-      </tr>
-    </tfoot>
-  </table>
-  </div>
-
-  <h4 style="margin:24px 0 8px 0;">📈 Lead-Volumen pro Monat</h4>
-  <canvas id="leadSourceChart" style="max-height:300px; margin-bottom:20px;"></canvas>
-
-  <h4 style="margin:16px 0 8px 0;">🔀 August 2026 vs. 2025</h4>
-  <div style="overflow-x:auto;">
-  <table style="width:100%; border-collapse:collapse; font-size:12px; max-width:500px;">
-    <thead>
-      <tr style="color:var(--text-secondary); text-align:left;">
-        <th style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.1);">Typ</th>
-        <th style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.1); text-align:right;">2025</th>
-        <th style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.1); text-align:right;">2026</th>
-        <th style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.1); text-align:right;">Δ</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05);"><span style="color:#4ade80;">●</span> Ausstellungsbesuch</td>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">106</td>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">6</td>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#f87171;">-94%</span></td>
-        </tr>
-        
-        <tr>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05);"><span style="color:#60a5fa;">●</span> Inbound Call</td>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">96</td>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">7</td>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#f87171;">-93%</span></td>
-        </tr>
-        
-        <tr>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05);"><span style="color:#a78bfa;">●</span> Konfigurator</td>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">61</td>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">6</td>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#f87171;">-90%</span></td>
-        </tr>
-        
-        <tr>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05);"><span style="color:#fbbf24;">●</span> Kontaktformular</td>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">29</td>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">4</td>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#f87171;">-86%</span></td>
-        </tr>
-        
-        <tr>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05);"><span style="color:#f472b6;">●</span> Quiz</td>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right; color:var(--text-secondary);">17</td>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">4</td>
-          <td style="padding:6px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;"><span style="color:#f87171;">-76%</span></td>
-        </tr>
-        </tbody>
-  </table>
-  </div>
 </div>
 
-<script>
-(function() {
-  const ctx = document.getElementById('leadSourceChart');
-  if (!ctx) return;
-  const data = {"labels": ["2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08"], "Ausstellungsbesuch": [88, 60, 96, 107, 96, 144, 120, 106, 89, 69, 52, 33, 57, 71, 90, 88, 130, 153, 108, 6], "Inbound Call": [38, 45, 65, 71, 59, 72, 75, 96, 63, 60, 46, 26, 46, 32, 75, 53, 58, 78, 64, 7], "Konfigurator": [29, 20, 58, 27, 21, 24, 54, 61, 55, 41, 26, 20, 30, 30, 32, 38, 46, 61, 50, 6], "Kontaktformular": [29, 22, 29, 36, 33, 32, 31, 29, 14, 25, 13, 18, 28, 19, 25, 43, 45, 28, 23, 4], "Quiz": [8, 5, 16, 19, 18, 22, 23, 17, 15, 4, 15, 10, 16, 9, 19, 8, 15, 10, 16, 4]};
-  const colors = {
-    'Ausstellungsbesuch': '#4ade80',
-    'Inbound Call': '#60a5fa',
-    'Konfigurator': '#a78bfa',
-    'Kontaktformular': '#fbbf24',
-    'Quiz': '#f472b6',
-  };
-  const datasets = ['Ausstellungsbesuch', 'Inbound Call', 'Konfigurator', 'Kontaktformular', 'Quiz'].map(cat => ({
-    label: cat,
-    data: data[cat],
-    borderColor: colors[cat],
-    backgroundColor: colors[cat] + '20',
-    borderWidth: 2,
-    tension: 0.3,
-    fill: false,
-  }));
-  new Chart(ctx, {
-    type: 'line',
-    data: {labels: data.labels, datasets: datasets},
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: {mode:'index', intersect:false},
-      scales: {
-        y: {title:{display:true, text:'Leads', color:'var(--text-secondary)'}, ticks:{color:'var(--text-secondary)'}, grid:{color:'rgba(255,255,255,0.05)'}},
-        x: {ticks:{color:'var(--text-secondary)', maxRotation: 45, minRotation: 45}, grid:{color:'rgba(255,255,255,0.05)'}}
-      },
-      plugins: {legend:{labels:{color:'#d4d4d8', font:{size:11}}}}
-    }
-  });
-})();
-</script>
 
 
 
@@ -944,31 +558,31 @@ canvas{max-height:240px}
     
         <div style="flex:1;min-width:170px;padding:14px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;">
           <div style="font-size:11px;color:var(--text-muted);font-weight:500;margin-bottom:6px;">Google Ads</div>
-          <div style="font-size:22px;font-weight:600;color:var(--text-primary);letter-spacing:-0.3px;font-variant-numeric:tabular-nums;">€583.384</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;font-variant-numeric:tabular-nums;">Monat: €44.588</div>
+          <div id="chYtdGoogleValue" style="font-size:22px;font-weight:600;color:var(--text-primary);letter-spacing:-0.3px;font-variant-numeric:tabular-nums;">–</div>
+          <div id="chYtdGoogleSub" style="font-size:12px;color:var(--text-muted);margin-top:4px;font-variant-numeric:tabular-nums;">–</div>
         </div>
-        
-    
+
+
         <div style="flex:1;min-width:170px;padding:14px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;">
           <div style="font-size:11px;color:var(--text-muted);font-weight:500;margin-bottom:6px;">Meta Performance</div>
-          <div style="font-size:22px;font-weight:600;color:var(--text-primary);letter-spacing:-0.3px;font-variant-numeric:tabular-nums;">€80.858</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;font-variant-numeric:tabular-nums;">Monat: €4.484</div>
+          <div id="chYtdMetaValue" style="font-size:22px;font-weight:600;color:var(--text-primary);letter-spacing:-0.3px;font-variant-numeric:tabular-nums;">–</div>
+          <div id="chYtdMetaSub" style="font-size:12px;color:var(--text-muted);margin-top:4px;font-variant-numeric:tabular-nums;">–</div>
         </div>
-        
-    
+
+
         <div style="flex:1;min-width:170px;padding:14px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;">
           <div style="font-size:11px;color:var(--text-muted);font-weight:500;margin-bottom:6px;">Meta Brand</div>
-          <div style="font-size:22px;font-weight:600;color:var(--text-primary);letter-spacing:-0.3px;font-variant-numeric:tabular-nums;">€32.142</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;font-variant-numeric:tabular-nums;">Monat: €4.099</div>
+          <div id="chYtdBrandValue" style="font-size:22px;font-weight:600;color:var(--text-primary);letter-spacing:-0.3px;font-variant-numeric:tabular-nums;">–</div>
+          <div id="chYtdBrandSub" style="font-size:12px;color:var(--text-muted);margin-top:4px;font-variant-numeric:tabular-nums;">–</div>
         </div>
-        
-    
+
+
         <div style="flex:1;min-width:170px;padding:14px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;">
           <div style="font-size:11px;color:var(--text-muted);font-weight:500;margin-bottom:6px;">Σ Total Ad Spend</div>
-          <div style="font-size:22px;font-weight:600;color:var(--cta);letter-spacing:-0.3px;font-variant-numeric:tabular-nums;">€696.384</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:4px;font-variant-numeric:tabular-nums;">Monat: €53.171</div>
+          <div id="chYtdTotalValue" style="font-size:22px;font-weight:600;color:var(--cta);letter-spacing:-0.3px;font-variant-numeric:tabular-nums;">–</div>
+          <div id="chYtdTotalSub" style="font-size:12px;color:var(--text-muted);margin-top:4px;font-variant-numeric:tabular-nums;">–</div>
         </div>
-        
+
   </div>
   <div style="background:var(--warn-soft);border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-top:14px;font-size:12px;color:var(--text-secondary);line-height:1.5;">
     <strong style="color:var(--warn);">⚠ Cross-Attribution:</strong> Die folgenden Performance-Tabellen sind nicht 1:1 attributiert — ein Lead aus Kampagne X kann durch parallele Touchpoints (Google, Meta, SEO, Direct) zu uns gekommen sein. Plus: Deals schließen verzögert (~19d Sales-Cycle), und manche Conversions sind durch DSGVO-Consent + fehlende GCLIDs unterrepräsentiert.
@@ -981,8 +595,8 @@ canvas{max-height:240px}
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
     <h3 style="margin-bottom:0;">Meta-Ads Performance pro Kampagne</h3>
     <div style="display:inline-flex;background:var(--neutral-soft);border:1px solid var(--border);border-radius:8px;padding:3px;font-size:12px;">
-      <button class="meta-toggle-btn active" data-period="ytd" onclick="metaSwitchPeriod('ytd')" style="background:#fff;border:none;padding:5px 12px;border-radius:6px;font-weight:600;color:var(--text-primary);cursor:pointer;font-size:12px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">YTD 2026</button>
-      <button class="meta-toggle-btn" data-period="month" onclick="metaSwitchPeriod('month')" style="background:transparent;border:none;padding:5px 12px;border-radius:6px;font-weight:500;color:var(--text-muted);cursor:pointer;font-size:12px;">August 2026</button>
+      <button class="meta-toggle-btn active" data-period="ytd" onclick="metaSwitchPeriod('ytd')" style="background:#fff;border:none;padding:5px 12px;border-radius:6px;font-weight:600;color:var(--text-primary);cursor:pointer;font-size:12px;box-shadow:0 1px 2px rgba(0,0,0,0.04);" id="metaTogglePeriodYtd">YTD –</button>
+      <button class="meta-toggle-btn" data-period="month" onclick="metaSwitchPeriod('month')" style="background:transparent;border:none;padding:5px 12px;border-radius:6px;font-weight:500;color:var(--text-muted);cursor:pointer;font-size:12px;" id="metaTogglePeriodMonth">–</button>
     </div>
   </div>
   <div style="overflow-x:auto;">
@@ -1003,8 +617,8 @@ canvas{max-height:240px}
       <tbody id="metaPerfBodyMonth" style="display:none;"><tr><td style="font-weight:500;">SwimSpa Abverkauf</td><td class="num"><span style="color:var(--text-muted);">—</span></td><td class="num">0</td><td class="num">0</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num" style="font-weight:600;">—</td></tr><tr><td style="font-weight:500;">Aussteller Abverkauf</td><td class="num"><span style="color:var(--text-muted);">—</span></td><td class="num">0</td><td class="num">0</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num" style="font-weight:600;">—</td></tr><tr><td style="font-weight:500;">SwimSpa Quiz</td><td class="num"><span style="color:var(--text-muted);">—</span></td><td class="num">0</td><td class="num">0</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num" style="font-weight:600;">—</td></tr><tr><td style="font-weight:500;">SwimSpa Typeform</td><td class="num"><span style="color:var(--text-muted);">—</span></td><td class="num">0</td><td class="num">0</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num" style="font-weight:600;">—</td></tr><tr><td style="font-weight:500;">Aquarun Typeform</td><td class="num"><span style="color:var(--text-muted);">—</span></td><td class="num">0</td><td class="num">0</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num" style="font-weight:600;">—</td></tr><tr><td style="font-weight:500;">Videoask</td><td class="num"><span style="color:var(--text-muted);">—</span></td><td class="num">0</td><td class="num">0</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num" style="font-weight:600;">—</td></tr><tr><td style="font-weight:500;">Vortex 20%</td><td class="num"><span style="color:var(--text-muted);">—</span></td><td class="num">0</td><td class="num">0</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num" style="font-weight:600;">—</td></tr><tr style="background:var(--neutral-soft);font-weight:600;"><td>Σ Total</td><td class="num">€0</td><td class="num">0</td><td class="num">0</td><td class="num">€0</td><td class="num">—</td><td class="num">—</td><td class="num">—</td></tr></tbody>
     </table>
   </div>
-  <div style="margin-top:10px;font-size:11px;color:var(--text-muted);">
-    Stand: 2026-08-07 06:51 · Datenbasis: Meta Insights (Spend) + Zoho-CRM-Listen (Leads = Contacts mit Created_Time im Zeitraum, Deals = Won-Stage-Deals mit Closing_Date im Zeitraum, Umsatz = Σ Amount).
+  <div id="metaPerfStand" style="margin-top:10px;font-size:11px;color:var(--text-muted);">
+    ⚠️ Noch nicht live verbunden (Meta-Ads-API fehlt) · Datenbasis geplant: Meta Insights (Spend) + Zoho-CRM-Listen (Leads = Contacts mit Created_Time im Zeitraum, Deals = Won-Stage-Deals mit Closing_Date im Zeitraum, Umsatz = Σ Amount).
   </div>
 </div>
 <script>
@@ -1105,22 +719,9 @@ function toggleCpc(){
 <script>
 Chart.defaults.color='#475569';Chart.defaults.borderColor='#e5e7eb';Chart.defaults.font.family="'Inter',-apple-system,sans-serif";
 const months=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
-
-(function(){
-const tooltipOpts = {backgroundColor:'#fff',titleColor:'#0f172a',bodyColor:'#475569',borderColor:'#e5e7eb',borderWidth:1,padding:10,boxPadding:6,cornerRadius:8,titleFont:{weight:'600',size:12},bodyFont:{size:12}};
-
-new Chart(document.getElementById('dealsChart').getContext('2d'),{type:'line',data:{labels:months,datasets:[
-{label:'2025',data:[42, 74, 115, 96, 86, 152, 105, 113, 124, 91, 90, 44],borderColor:'#cbd5e1',borderWidth:1.5,tension:0.35,pointRadius:0,pointHoverRadius:4,fill:false,spanGaps:true},
-{label:'2026',data:[58, 55, 102, 86, 149, 122, 74, 3, null, null, null, null],borderColor:'#0f172a',borderWidth:2,tension:0.35,pointRadius:0,pointHoverRadius:4,fill:false,spanGaps:true},
-{label:'FC',data:[null,null,null,null,null,null,null,25,null,null,null,null],borderColor:'#0f172a',borderWidth:1.5,borderDash:[5,4],tension:0.35,pointRadius:3,pointBackgroundColor:'#fff',pointBorderColor:'#0f172a',pointBorderWidth:1.5,spanGaps:false}
-]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:tooltipOpts},scales:{x:{grid:{display:false},ticks:{font:{size:11},color:'#94a3b8'},border:{display:false}},y:{grid:{color:'#f1f5f9',drawBorder:false},ticks:{font:{size:11},color:'#94a3b8'},beginAtZero:true,border:{display:false}}}}});
-
-new Chart(document.getElementById('spendChart').getContext('2d'),{type:'line',data:{labels:months,datasets:[
-{label:'2025',data:[59334, 76973, 123186, 138536, 127892, 134727, 137016, 150707, 140810, 116275, 91096, 64635],borderColor:'#cbd5e1',borderWidth:1.5,tension:0.35,pointRadius:0,pointHoverRadius:4,fill:false,spanGaps:true},
-{label:'2026',data:[95266, 97893, 130792, 130242, 178440, 165695, 135765, 16117, null, null, null, null],borderColor:'#0f172a',borderWidth:2,tension:0.35,pointRadius:0,pointHoverRadius:4,fill:false,spanGaps:true},
-{label:'FC',data:[null,null,null,null,null,null,null,71375,null,null,null,null],borderColor:'#0f172a',borderWidth:1.5,borderDash:[5,4],tension:0.35,pointRadius:3,pointBackgroundColor:'#fff',pointBorderColor:'#0f172a',pointBorderWidth:1.5,spanGaps:false}
-]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{...tooltipOpts,callbacks:{label:c=>c.dataset.label+': €'+c.parsed.y.toLocaleString('de-DE')}}},scales:{x:{grid:{display:false},ticks:{font:{size:11},color:'#94a3b8'},border:{display:false}},y:{grid:{color:'#f1f5f9',drawBorder:false},ticks:{font:{size:11},color:'#94a3b8',callback:v=>'€'+(v/1000).toFixed(0)+'k'},beginAtZero:true,border:{display:false}}}}});
-})();
+// Die "Deals pro Monat"/"Total Spend pro Monat"-Charts wurden frueher hier mit
+// fest hinterlegten Demo-Zahlen erzeugt. Sie werden jetzt weiter unten, NACH
+// dem Parsen von snapData, live aus SNAPS aufgebaut (siehe dort).
 </script>
 
 <script id="snapData" type="application/json">{}</script>
@@ -1132,6 +733,127 @@ var MNAMES = {'01':'Januar','02':'Februar','03':'März','04':'April','05':'Mai',
 var histChart = null;
 
 function fmt(n) { return '€' + Math.round(n).toLocaleString('de-DE'); }
+
+(function () {
+  // Seitentitel, Live-Dropdown-Eintrag und Monats-Archiv-Liste frueher fest
+  // im Template hinterlegt (Monatsname + erfundene "X Deals, €Y" pro
+  // Archiv-Monat) - jetzt live aus SNAPS aufgebaut, damit nichts veraltet
+  // oder falsche Zahlen zeigt, sobald ein neuer Monat beginnt.
+  var curMk = Object.keys(SNAPS).sort().reverse().find(function (k) { return SNAPS[k].status === 'live'; });
+  var headerMonthEl = document.getElementById('headerMonthLabel');
+  var sel = document.getElementById('monthSelect');
+
+  var topSellerHeadingEl = document.getElementById('topSellerHeading');
+  var brandMixHeadingEl = document.getElementById('brandMixHeading');
+  var topSellerMonthColEl = document.getElementById('topSellerMonthCol');
+  var merFilialePeriodEl = document.getElementById('merFilialePeriod');
+  var metaTogglePeriodYtdEl = document.getElementById('metaTogglePeriodYtd');
+  var metaTogglePeriodMonthEl = document.getElementById('metaTogglePeriodMonth');
+
+  if (curMk) {
+    var cp = curMk.split('-');
+    var curName = MNAMES[cp[1]] + ' ' + cp[0];
+    if (headerMonthEl) headerMonthEl.textContent = curName;
+    if (sel) {
+      var liveOpt = sel.querySelector('option[value="live"]');
+      if (liveOpt) liveOpt.textContent = '📡 ' + curName + ' (Live)';
+    }
+    if (topSellerHeadingEl) topSellerHeadingEl.textContent = '🏆 Top Verkäufer ' + curName;
+    if (brandMixHeadingEl) brandMixHeadingEl.textContent = '🏷️ Hersteller-Mix ' + curName;
+    if (topSellerMonthColEl) topSellerMonthColEl.textContent = MNAMES[cp[1]];
+    if (merFilialePeriodEl) merFilialePeriodEl.textContent = curName;
+    if (metaTogglePeriodYtdEl) metaTogglePeriodYtdEl.textContent = 'YTD ' + cp[0];
+    if (metaTogglePeriodMonthEl) metaTogglePeriodMonthEl.textContent = curName;
+  } else if (headerMonthEl) {
+    headerMonthEl.textContent = '–';
+  }
+
+  if (sel) {
+    var archivedKeys = Object.keys(SNAPS).filter(function (k) {
+      return k !== curMk && SNAPS[k].status !== 'live';
+    }).sort().reverse();
+    archivedKeys.forEach(function (k) {
+      var snap = SNAPS[k];
+      var p = k.split('-');
+      var label = MNAMES[p[1]] + ' ' + p[0];
+      if (snap.deals_won != null && snap.revenue != null) {
+        label += ' — ' + snap.deals_won + ' Deals, ' + fmt(snap.revenue);
+      }
+      var opt = document.createElement('option');
+      opt.value = k;
+      opt.textContent = label;
+      sel.appendChild(opt);
+    });
+    var archiveCountEl = document.getElementById('archiveCount');
+    if (archiveCountEl) {
+      archiveCountEl.textContent = archivedKeys.length + ' Monat' + (archivedKeys.length === 1 ? '' : 'e') + ' im Archiv';
+    }
+  }
+})();
+
+(function(){
+  // Live "Deals pro Monat — 2025 vs. 2026"-Chart direkt aus snapData aufbauen
+  // (statt der frueheren fest hinterlegten Demo-Zahlen). deals_won steht fuer
+  // jeden erfassten Monat (2025 + 2026) echt zur Verfuegung, siehe
+  // jobs/weekly_numbers_update.py -> aggregate_by_month()/build_snapdata().
+  var tooltipOpts = {backgroundColor:'#fff',titleColor:'#0f172a',bodyColor:'#475569',borderColor:'#e5e7eb',borderWidth:1,padding:10,boxPadding:6,cornerRadius:8,titleFont:{weight:'600',size:12},bodyFont:{size:12}};
+  var curMk = Object.keys(SNAPS).sort().reverse().find(function(k){ return SNAPS[k].status === 'live'; });
+  // Aktuelles/Vorjahr nicht hart codieren (sonst veraltet der Vergleich mit
+  // jedem Jahreswechsel) - stattdessen aus dem live-Monat bzw., falls keiner
+  // gerade laeuft, aus dem juengsten in SNAPS vorhandenen Jahr ableiten.
+  var allYearsSeen = Object.keys(SNAPS).map(function(k){ return parseInt(k.slice(0,4), 10); });
+  var curYear = curMk ? parseInt(curMk.slice(0, 4), 10) : (allYearsSeen.length ? Math.max.apply(null, allYearsSeen) : new Date().getFullYear());
+  var prevYear = curYear - 1;
+
+  var dealsChartTitleEl = document.getElementById('dealsChartTitle');
+  var dealsLegendPrevYearEl = document.getElementById('dealsLegendPrevYear');
+  var dealsLegendCurYearEl = document.getElementById('dealsLegendCurYear');
+  if (dealsChartTitleEl) dealsChartTitleEl.textContent = '📅 Deals pro Monat — ' + prevYear + ' vs. ' + curYear;
+  if (dealsLegendPrevYearEl) dealsLegendPrevYearEl.textContent = prevYear;
+  if (dealsLegendCurYearEl) dealsLegendCurYearEl.textContent = curYear;
+
+  function monthVal(year, mIdx) {
+    var mk = year + '-' + String(mIdx + 1).padStart(2, '0');
+    return SNAPS[mk] ? SNAPS[mk].deals_won : null;
+  }
+
+  var dealsPrevYear = months.map(function(_, i) { return monthVal(prevYear, i); });
+  var dealsCurYear = months.map(function(_, i) { return monthVal(curYear, i); });
+  var dealsFC = months.map(function() { return null; });
+  if (curMk && parseInt(curMk.slice(0, 4), 10) === curYear && SNAPS[curMk].forecast && SNAPS[curMk].forecast.deals != null) {
+    dealsFC[parseInt(curMk.slice(5, 7), 10) - 1] = SNAPS[curMk].forecast.deals;
+  }
+  var haveDealsData = dealsPrevYear.some(function(v) { return v != null; }) || dealsCurYear.some(function(v) { return v != null; });
+  var dealsCanvas = document.getElementById('dealsChart');
+  var dealsStandEl = document.getElementById('dealsChartStand');
+  if (dealsCanvas && haveDealsData) {
+    new Chart(dealsCanvas.getContext('2d'), {type:'line', data:{labels:months, datasets:[
+      {label:String(prevYear), data:dealsPrevYear, borderColor:'#cbd5e1', borderWidth:1.5, tension:0.35, pointRadius:0, pointHoverRadius:4, fill:false, spanGaps:true},
+      {label:String(curYear), data:dealsCurYear, borderColor:'#0f172a', borderWidth:2, tension:0.35, pointRadius:0, pointHoverRadius:4, fill:false, spanGaps:true},
+      {label:'FC', data:dealsFC, borderColor:'#0f172a', borderWidth:1.5, borderDash:[5,4], tension:0.35, pointRadius:3, pointBackgroundColor:'#fff', pointBorderColor:'#0f172a', pointBorderWidth:1.5, spanGaps:false}
+    ]}, options:{responsive:true, maintainAspectRatio:true, plugins:{legend:{display:false}, tooltip:tooltipOpts}, scales:{x:{grid:{display:false}, ticks:{font:{size:11}, color:'#94a3b8'}, border:{display:false}}, y:{grid:{color:'#f1f5f9', drawBorder:false}, ticks:{font:{size:11}, color:'#94a3b8'}, beginAtZero:true, border:{display:false}}}}});
+    if (dealsStandEl) dealsStandEl.textContent = 'Live aus Zoho CRM · ' + Object.keys(SNAPS).length + ' Monate erfasst.';
+  } else if (dealsStandEl) {
+    dealsStandEl.textContent = 'Noch keine Deal-Historie verbunden.';
+  }
+
+  // "Total Spend pro Monat": historische Monats-Spends sind (noch) nicht
+  // verfuegbar - nur der aktuelle Monat wird per Google-Ads-Wochenbericht live
+  // gemeldet (siehe total_spend in build_snapdata()). Kein echter Datenpunkt
+  // fuer vergangene Monate -> ehrlich als "noch nicht verbunden" anzeigen,
+  // statt Fantasiezahlen zu erfinden.
+  var spendCanvas = document.getElementById('spendChart');
+  var spendStandEl = document.getElementById('spendChartStand');
+  if (spendCanvas) {
+    spendCanvas.style.display = 'none';
+    var spendLegend = spendCanvas.nextElementSibling;
+    if (spendLegend && spendLegend.classList.contains('chart-legend')) spendLegend.style.display = 'none';
+  }
+  if (spendStandEl) {
+    spendStandEl.style.cssText = 'font-size:12px;color:var(--text-muted);padding:40px 10px;text-align:center;';
+    spendStandEl.textContent = 'Historische Monats-Spends noch nicht verbunden – nur der aktuelle Monat kommt live aus dem Google-Ads-Wochenbericht.';
+  }
+})();
 
 (function(){
   // Live Kopfzeile oben rechts: Datum, Uhrzeit (UTC) und laufender Tag/Monat.
@@ -1192,6 +914,166 @@ function fmt(n) { return '€' + Math.round(n).toLocaleString('de-DE'); }
   } else {
     elSensNote.textContent = 'Sensitivität: noch nicht genug Monatshistorie (mind. 3 abgeschlossene Monate nötig)';
   }
+})();
+
+(function(){
+  // Signal-Details-Tabelle + Channel-Spend-Karten mit echten Werten aus
+  // snapData fuellen (statt der frueheren fest hinterlegten Demo-Zeilen).
+  // Siehe lib/forecast.py -> combine() / jobs/weekly_numbers_update.py -> build_forecast_block().
+  var liveMk2 = Object.keys(SNAPS).sort().reverse().find(function(k){ return SNAPS[k].status === 'live'; });
+  var s = liveMk2 ? SNAPS[liveMk2] : null;
+  var fc = (s && s.forecast) || {};
+  var signals = fc.signals || {};
+  var weights = fc.weights_used || {};
+
+  // "WpK"-Karte oben im Live-View: frueher fest hinterlegtes "€5.372" /
+  // Forecast "€2.855", jetzt ehrlich aus s.total_spend / s.deals_won bzw.
+  // fc.wpk (Jean-Clawd Forecast Engine) berechnet. total_spend deckt aktuell
+  // nur Google Ads ab (Meta/Brand noch nicht angebunden) -> das steht auch so
+  // in der Sub-Zeile, statt eine vollstaendige WpK vorzutaeuschen.
+  (function () {
+    var wpkValEl = document.getElementById('liveWpkValue');
+    var wpkSubEl = document.getElementById('liveWpkSub');
+    if (!wpkValEl || !wpkSubEl) return;
+    var wpkActual = (s && s.deals_won > 0 && s.total_spend != null) ? s.total_spend / s.deals_won : null;
+    if (wpkActual != null) {
+      wpkValEl.textContent = fmt(wpkActual);
+      var sub = 'Ziel: €1.000';
+      if (fc.wpk != null) {
+        sub = 'Forecast: <span class="up">' + fmt(fc.wpk) + '</span> &nbsp; ' + sub;
+      }
+      sub += ' &nbsp; <span style="color:var(--text-muted);">(nur Google Ads)</span>';
+      wpkSubEl.innerHTML = sub;
+    } else {
+      wpkValEl.textContent = '–';
+      wpkSubEl.textContent = 'Noch nicht verbunden';
+    }
+  })();
+
+  var SIGNAL_META = [
+    { key: 'pacing', icon: '📈', label: 'Pacing' },
+    { key: 'saisonalitaet', icon: '📅', label: 'Saisonalität' },
+    { key: 'wetter', icon: '🌤️', label: 'Wetter' },
+    { key: 'seo', icon: '🔍', label: 'SEO' },
+    { key: 'ads_effizienz', icon: '💸', label: 'Ads-Effizienz' },
+    { key: 'sales_cycle', icon: '⏱️', label: 'Sales Cycle' }
+  ];
+
+  var sigBody = document.getElementById('signalDetailsBody');
+  if (sigBody) {
+    if (!s) {
+      sigBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Keine Live-Daten verfügbar</td></tr>';
+    } else {
+      sigBody.innerHTML = SIGNAL_META.map(function (m) {
+        var sig = signals[m.key] || {};
+        var val = sig.value;
+        var valTxt = (val != null) ? ((val >= 0 ? '+' : '') + val.toFixed(2)) : '–';
+        var w = weights[m.key];
+        var wTxt = (w != null) ? Math.round(w * 100) + '%' : '–';
+        var active = val != null;
+        var pill = active
+          ? '<span class="pill pill-green">Aktiv</span>'
+          : '<span class="pill pill-amber">Inaktiv</span>';
+        var note = sig.note || '–';
+        return '<tr><td>' + m.icon + ' ' + m.label + '</td><td>' + note + '</td>' +
+          '<td class="num' + (active ? ' highlight' : '') + '">' + valTxt + '</td>' +
+          '<td class="num">' + wTxt + '</td><td>' + pill + '</td></tr>';
+      }).join('');
+    }
+  }
+
+  // Gleiche echten signals/weights auch in die "Signal-Gewichtung → Deals"-
+  // Balkenkarte oben auf der Seite schreiben (statt der frueheren fest
+  // hinterlegten Demo-Balken/-Zahlen).
+  SIGNAL_META.forEach(function (m) {
+    var fillEl = document.getElementById('sigFill_' + m.key);
+    var valEl = document.getElementById('sigVal_' + m.key);
+    if (!fillEl || !valEl) return;
+    var w = weights[m.key];
+    if (w != null) {
+      var pct = Math.round(w * 100);
+      fillEl.style.width = Math.min(100, pct * 2) + '%';
+      fillEl.textContent = pct + '%';
+    } else {
+      fillEl.style.width = '0%';
+      fillEl.textContent = '';
+    }
+    var sig = signals[m.key] || {};
+    var val = sig.value;
+    valEl.textContent = (val != null) ? ((val >= 0 ? '+' : '') + val.toFixed(2)) : '–';
+  });
+  var ensembleEl = document.getElementById('sigEnsembleResult');
+  if (ensembleEl) {
+    ensembleEl.textContent = (fc.deals != null) ? (fc.deals + ' Deals') : '–';
+  }
+
+  function chSpendCard(valueId, subId, spend, extra) {
+    var vEl = document.getElementById(valueId);
+    var sEl = document.getElementById(subId);
+    if (!vEl || !sEl) return;
+    if (spend != null) {
+      vEl.textContent = fmt(spend);
+      sEl.textContent = extra || 'MTD';
+    } else {
+      vEl.textContent = '€0';
+      sEl.textContent = 'Noch nicht verbunden';
+    }
+  }
+
+  if (s) {
+    var gaExtra = (s.google_ads_spend_ytd != null) ? 'YTD: ' + fmt(s.google_ads_spend_ytd) : 'MTD (Google Ads Wochenbericht)';
+    chSpendCard('chGoogleAdsValue', 'chGoogleAdsSub', s.google_ads_spend, gaExtra);
+    chSpendCard('chMetaValue', 'chMetaSub', s.meta_perf_spend, null);
+    chSpendCard('chBrandValue', 'chBrandSub', s.brand_spend, null);
+  } else {
+    ['chGoogleAdsValue', 'chMetaValue', 'chBrandValue'].forEach(function (id) {
+      var el = document.getElementById(id); if (el) el.textContent = '–';
+    });
+    ['chGoogleAdsSub', 'chMetaSub', 'chBrandSub'].forEach(function (id) {
+      var el = document.getElementById(id); if (el) el.textContent = 'Keine Live-Daten verfügbar';
+    });
+  }
+
+  // "Channel-Performance · Spend-Übersicht YTD"-Karte: frueher fest hinterlegte
+  // Demo-Zahlen (Google/Meta/Brand YTD+Monat), jetzt ehrlich live befuellt.
+  // Google Ads YTD-Spend kommt real aus dem Google-Ads-Wochenbericht
+  // (nur fuer den aktuellen Monat verfuegbar). Meta Performance/Brand haben
+  // noch keine angebundene Datenquelle (meta_perf_spend/brand_spend sind
+  // immer null) -> ehrlich "–" statt Fantasiezahlen.
+  (function () {
+    function ytdCard(valueId, subId, ytd, mtd) {
+      var vEl = document.getElementById(valueId);
+      var sEl = document.getElementById(subId);
+      if (!vEl || !sEl) return;
+      if (ytd != null) {
+        vEl.textContent = fmt(ytd);
+        sEl.textContent = 'Monat: ' + (mtd != null ? fmt(mtd) : '–');
+      } else {
+        vEl.textContent = '–';
+        sEl.textContent = 'Noch nicht verbunden';
+      }
+    }
+    var gaYtd = s ? s.google_ads_spend_ytd : null;
+    var gaMtd = s ? s.google_ads_spend : null;
+    ytdCard('chYtdGoogleValue', 'chYtdGoogleSub', gaYtd, gaMtd);
+    ytdCard('chYtdMetaValue', 'chYtdMetaSub', null, null);
+    ytdCard('chYtdBrandValue', 'chYtdBrandSub', null, null);
+
+    // Total: nur aus tatsaechlich verfuegbaren Quellen summieren (aktuell nur
+    // Google Ads) statt eine Summe vorzutaeuschen, die Meta-Anteile enthaelt,
+    // die es gar nicht gibt.
+    var totalYtdEl = document.getElementById('chYtdTotalValue');
+    var totalSubEl = document.getElementById('chYtdTotalSub');
+    if (totalYtdEl && totalSubEl) {
+      if (gaYtd != null) {
+        totalYtdEl.textContent = fmt(gaYtd);
+        totalSubEl.textContent = 'Monat: ' + (gaMtd != null ? fmt(gaMtd) : '–') + ' · nur Google Ads (Meta noch nicht verbunden)';
+      } else {
+        totalYtdEl.textContent = '–';
+        totalSubEl.textContent = 'Noch nicht verbunden';
+      }
+    }
+  })();
 })();
 
 (function(){
@@ -1296,9 +1178,11 @@ function fmt(n) { return '€' + Math.round(n).toLocaleString('de-DE'); }
   // "MER Tracking"-Hero-Karte: Umsatz/Verkaeufe/Leads/Pacing sind live aus
   // Google Sheet + Zoho-CRM-Drive-Export bzw. echtem Datum berechnet (siehe
   // jobs/weekly_numbers_update.py -> build_hero_block()). Marketing-Spend/MER
-  // sowie Vormonat-Final/YTD sind noch nicht an eine Datenquelle angebunden
-  // (keine Google/Meta-Ads-API, keine historischen Monate in der Live-Pipeline)
-  // und werden ehrlich als "noch nicht verbunden" ausgewiesen statt Fantasiezahlen.
+  // sind noch nicht an eine Datenquelle angebunden (kein Meta/Brand-Ads-API-
+  // Zugang) und werden ehrlich als "noch nicht verbunden" ausgewiesen statt
+  // Fantasiezahlen. Vormonat-Final/YTD stammen live aus SNAPS (Julians Excel
+  // via aggregate_by_month()), da dort echte Umsatz-/Verkaufszahlen fuer
+  // alle (auch vergangene, status "final") Monate vorliegen.
   var el = document.getElementById('heroMonthLabel');
   if (!el) return;
   var HERO = {};
@@ -1346,6 +1230,39 @@ function fmt(n) { return '€' + Math.round(n).toLocaleString('de-DE'); }
     merEl.textContent = '–';
     merSubEl.textContent = 'Ads-Spend noch nicht verbunden';
   }
+
+  // Vormonat Final + YTD: aus SNAPS (echte Werte je Monat), nicht aus HERO.
+  var prevFinalEl = document.getElementById('heroJuliFinal');
+  var ytdEl = document.getElementById('heroYtd');
+  var curMkHero = Object.keys(SNAPS).sort().reverse().find(function (k) { return SNAPS[k].status === 'live'; });
+  var finalKeysHero = Object.keys(SNAPS).filter(function (k) { return SNAPS[k].status === 'final'; }).sort().reverse();
+
+  if (prevFinalEl) {
+    var prevKeyHero = finalKeysHero[0];
+    var prevSnap = prevKeyHero ? SNAPS[prevKeyHero] : null;
+    if (prevSnap && prevSnap.revenue != null && prevSnap.deals_won != null) {
+      var pkHero = prevKeyHero.split('-');
+      var prevNameHero = MNAMES[pkHero[1]] + ' ' + pkHero[0];
+      prevFinalEl.innerHTML = '<strong style="color:var(--text-primary);font-weight:600;">Vormonat Final (' + prevNameHero + '):</strong> ' + prevSnap.deals_won + ' Deals, ' + fmt(prevSnap.revenue);
+    } else {
+      prevFinalEl.innerHTML = '<strong style="color:var(--text-primary);font-weight:600;">Vormonat Final:</strong> noch nicht verbunden';
+    }
+  }
+
+  if (ytdEl) {
+    var yearPrefixHero = (curMkHero || Object.keys(SNAPS).sort().reverse()[0] || '').slice(0, 4);
+    var ytdKeysHero = yearPrefixHero ? Object.keys(SNAPS).filter(function (k) { return k.slice(0, 4) === yearPrefixHero; }) : [];
+    var ytdRevenueHero = 0, ytdDealsHero = 0, haveYtdHero = false;
+    ytdKeysHero.forEach(function (k) {
+      if (SNAPS[k].revenue != null) { ytdRevenueHero += SNAPS[k].revenue; haveYtdHero = true; }
+      if (SNAPS[k].deals_won != null) { ytdDealsHero += SNAPS[k].deals_won; }
+    });
+    if (haveYtdHero) {
+      ytdEl.innerHTML = '<strong style="color:var(--text-primary);font-weight:600;">YTD ' + yearPrefixHero + ':</strong> ' + ytdDealsHero + ' Deals, ' + fmt(ytdRevenueHero);
+    } else {
+      ytdEl.innerHTML = '<strong style="color:var(--text-primary);font-weight:600;">YTD ' + (yearPrefixHero || new Date().getFullYear()) + ':</strong> noch nicht verbunden';
+    }
+  }
 })();
 
 function switchMonth(val) {
@@ -1369,10 +1286,17 @@ function switchMonth(val) {
   
   document.getElementById('histHeader').innerHTML = '📊 <span style="color:var(--accent);">' + name + '</span> — Endergebnis';
 
-  var wpk = s.deals_won > 0 ? s.total_spend / s.deals_won : 0;
-  var roas = s.total_spend > 0 ? s.revenue / s.total_spend : 0;
+  // Fuer abgeschlossene Monate liefert die Pipeline (noch) keinen Ad-Spend
+  // (google_ads_spend/meta_perf_spend/brand_spend/total_spend sind fuer
+  // status "final" immer null, siehe jobs/weekly_numbers_update.py) - vorher
+  // wurde hier trotzdem stur durch null geteilt ("€NaN"/"NaN% vom Total").
+  // Jetzt: ehrlich "–" zeigen statt fabrizierter Werte, sobald Spend fehlt.
+  var hasSpend = s.total_spend != null;
+  var wpk = (hasSpend && s.deals_won > 0) ? s.total_spend / s.deals_won : null;
+  var roas = (hasSpend && s.total_spend > 0) ? s.revenue / s.total_spend : null;
 
-  var merStatus = roas >= 10 ? 'hervorragend' : (roas >= 5 ? 'solide' : 'schwach');
+  var merStr = roas != null ? roas.toFixed(1) + 'x' : '–';
+  var merStatus = roas == null ? 'Ad-Spend noch nicht verbunden' : (roas >= 10 ? 'hervorragend' : (roas >= 5 ? 'solide' : 'schwach'));
   document.getElementById('histMerHero').innerHTML =
     '<div class="card-lg" style="background:linear-gradient(135deg,#dcfce7 0%,#f0fdf4 55%,#ecfdf5 100%);border:1px solid #86efac;margin-bottom:14px;">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;">' +
@@ -1382,28 +1306,31 @@ function switchMonth(val) {
         '</div>' +
         '<div style="text-align:right;">' +
           '<div style="font-size:11px;color:#166534;letter-spacing:0.5px;text-transform:uppercase;font-weight:600;">MER</div>' +
-          '<div style="font-size:44px;font-weight:700;color:#15803d;line-height:1;letter-spacing:-1px;font-variant-numeric:tabular-nums;">' + roas.toFixed(1) + 'x</div>' +
+          '<div style="font-size:44px;font-weight:700;color:#15803d;line-height:1;letter-spacing:-1px;font-variant-numeric:tabular-nums;">' + merStr + '</div>' +
           '<div style="font-size:11px;color:#166534;margin-top:2px;font-weight:500;">' + merStatus + '</div>' +
         '</div>' +
       '</div>' +
       '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:16px;padding-top:14px;border-top:1px solid #86efac66;">' +
         '<div><div style="font-size:11px;color:#166534;font-weight:500;">Umsatz Brutto</div><div style="font-size:20px;font-weight:600;color:var(--text-primary);margin-top:2px;font-variant-numeric:tabular-nums;">' + fmt(s.revenue) + '</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px;">aus Excel (Julian)</div></div>' +
         '<div><div style="font-size:11px;color:#166534;font-weight:500;">Verkäufe</div><div style="font-size:20px;font-weight:600;color:var(--text-primary);margin-top:2px;font-variant-numeric:tabular-nums;">' + s.deals_won + '</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Final-Stand</div></div>' +
-        '<div><div style="font-size:11px;color:#166534;font-weight:500;">Total Ad Spend</div><div style="font-size:20px;font-weight:600;color:var(--text-primary);margin-top:2px;font-variant-numeric:tabular-nums;">' + fmt(s.total_spend) + '</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Google + Meta + Brand</div></div>' +
-        '<div><div style="font-size:11px;color:#166534;font-weight:500;">Werbekosten / Kauf</div><div style="font-size:20px;font-weight:600;color:var(--text-primary);margin-top:2px;font-variant-numeric:tabular-nums;">' + (s.deals_won > 0 ? fmt(wpk) : '—') + '</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Ziel: &lt; €1.300</div></div>' +
+        '<div><div style="font-size:11px;color:#166534;font-weight:500;">Total Ad Spend</div><div style="font-size:20px;font-weight:600;color:var(--text-primary);margin-top:2px;font-variant-numeric:tabular-nums;">' + (hasSpend ? fmt(s.total_spend) : '–') + '</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px;">' + (hasSpend ? 'Google + Meta + Brand' : 'noch nicht verbunden') + '</div></div>' +
+        '<div><div style="font-size:11px;color:#166534;font-weight:500;">Werbekosten / Kauf</div><div style="font-size:20px;font-weight:600;color:var(--text-primary);margin-top:2px;font-variant-numeric:tabular-nums;">' + (wpk != null ? fmt(wpk) : '—') + '</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Ziel: &lt; €1.300</div></div>' +
       '</div>' +
     '</div>';
 
   document.getElementById('histCards').innerHTML =
-    '<div class="card"><div class="card-label">Total Ad Spend</div><div class="card-value">' + fmt(s.total_spend) + '</div><div class="card-sub">Google + Meta + Brand</div></div>' +
-    '<div class="card"><div class="card-label">Deals (Closed Won)</div><div class="card-value">' + s.deals_won + '</div><div class="card-sub">MER: <span class="highlight">' + roas.toFixed(1) + 'x</span></div></div>' +
+    '<div class="card"><div class="card-label">Total Ad Spend</div><div class="card-value">' + (hasSpend ? fmt(s.total_spend) : '–') + '</div><div class="card-sub">' + (hasSpend ? 'Google + Meta + Brand' : 'noch nicht verbunden') + '</div></div>' +
+    '<div class="card"><div class="card-label">Deals (Closed Won)</div><div class="card-value">' + s.deals_won + '</div><div class="card-sub">MER: <span class="highlight">' + merStr + '</span></div></div>' +
     '<div class="card"><div class="card-label">Revenue</div><div class="card-value">' + fmt(s.revenue) + '</div><div class="card-sub">Ø ' + fmt(s.revenue / Math.max(s.deals_won, 1)) + ' pro Deal</div></div>' +
-    '<div class="card"><div class="card-label">WpK</div><div class="card-value">' + fmt(wpk) + '</div><div class="card-sub">' + (wpk <= 1000 ? '<span class="up">✓ Unter Ziel</span>' : wpk <= 1300 ? '<span class="neutral">~ Ziel-Nähe</span>' : '<span class="down">↑ Über Ziel</span>') + ' &nbsp; Ziel: €1.000</div></div>';
-  
-  document.getElementById('histBreakdown').innerHTML = 
-    '<div class="card"><div class="card-label">Google Ads</div><div class="card-value" style="font-size:22px;">' + fmt(s.google_ads_spend) + '</div><div class="card-sub">' + ((s.google_ads_spend/s.total_spend)*100).toFixed(0) + '% vom Total</div></div>' +
-    '<div class="card"><div class="card-label">Meta Perf.</div><div class="card-value" style="font-size:22px;">' + fmt(s.meta_perf_spend) + '</div><div class="card-sub">' + ((s.meta_perf_spend/s.total_spend)*100).toFixed(0) + '% vom Total</div></div>' +
-    '<div class="card"><div class="card-label">Brand</div><div class="card-value" style="font-size:22px;">' + fmt(s.brand_spend) + '</div><div class="card-sub">' + ((s.brand_spend/s.total_spend)*100).toFixed(0) + '% vom Total</div></div>';
+    '<div class="card"><div class="card-label">WpK</div><div class="card-value">' + (wpk != null ? fmt(wpk) : '–') + '</div><div class="card-sub">' + (wpk == null ? 'noch nicht verbunden' : (wpk <= 1000 ? '<span class="up">✓ Unter Ziel</span>' : wpk <= 1300 ? '<span class="neutral">~ Ziel-Nähe</span>' : '<span class="down">↑ Über Ziel</span>') + ' &nbsp; Ziel: €1.000') + '</div></div>';
+
+  document.getElementById('histBreakdown').innerHTML =
+    ['google_ads_spend', 'meta_perf_spend', 'brand_spend'].map(function (key, i) {
+      var labels = ['Google Ads', 'Meta Perf.', 'Brand'];
+      var v = s[key];
+      var pct = (v != null && hasSpend && s.total_spend > 0) ? ((v / s.total_spend) * 100).toFixed(0) + '% vom Total' : 'noch nicht verbunden';
+      return '<div class="card"><div class="card-label">' + labels[i] + '</div><div class="card-value" style="font-size:22px;">' + (v != null ? fmt(v) : '–') + '</div><div class="card-sub">' + pct + '</div></div>';
+    }).join('');
   
   var w = s.weather || {};
   var si = s.sistrix_si;
@@ -1424,17 +1351,21 @@ function switchMonth(val) {
   if (fc && fc.deals) {
     var dealsDiff = s.deals_won - fc.deals;
     var dealsPct = ((s.deals_won / fc.deals - 1) * 100).toFixed(1);
-    var spendDiff = s.total_spend - fc.spend;
-    var spendPct = ((s.total_spend / fc.spend - 1) * 100).toFixed(1);
-    var wpkActual = s.deals_won > 0 ? s.total_spend / s.deals_won : 0;
-    var wpkDiff = wpkActual - fc.wpk;
-    
+    // Spend/WpK-Actual sind fuer abgeschlossene Monate (noch) nicht verbunden
+    // (s.total_spend ist dann null) - vorher wurde trotzdem durch null geteilt
+    // ("€NaN" / "NaN%" / faelschlich als "Daneben" bewertet). Jetzt: bei
+    // fehlendem Spend ehrlich "–" statt Forecast-Vergleich zeigen.
+    var spendDiff = hasSpend ? s.total_spend - fc.spend : null;
+    var spendPct = hasSpend ? ((s.total_spend / fc.spend - 1) * 100).toFixed(1) : null;
+    var wpkActual = (hasSpend && s.deals_won > 0) ? s.total_spend / s.deals_won : null;
+    var wpkDiff = wpkActual != null ? wpkActual - fc.wpk : null;
+
     var fcHtml = '<h3>🎯 Forecast vs. Actual</h3><div style="overflow-x:auto;"><table>' +
       '<thead><tr><th>Metrik</th><th class="num">Forecast</th><th class="num">Actual</th><th class="num">Δ</th><th>Bewertung</th></tr></thead><tbody>';
-    
+
     fcHtml += '<tr><td>Deals</td><td class="num">' + fc.deals + '</td><td class="num">' + s.deals_won + '</td><td class="num">' + (dealsDiff >= 0 ? '+' : '') + dealsDiff + ' (' + dealsPct + '%)</td><td>' + (Math.abs(dealsPct) <= 10 ? '<span class="pill pill-green">Gut</span>' : Math.abs(dealsPct) <= 20 ? '<span class="pill pill-amber">OK</span>' : '<span class="pill pill-blue">Daneben</span>') + '</td></tr>';
-    fcHtml += '<tr><td>Spend</td><td class="num">' + fmt(fc.spend) + '</td><td class="num">' + fmt(s.total_spend) + '</td><td class="num">' + (spendDiff >= 0 ? '+' : '') + fmt(Math.abs(spendDiff)) + ' (' + spendPct + '%)</td><td>' + (Math.abs(spendPct) <= 10 ? '<span class="pill pill-green">Gut</span>' : Math.abs(spendPct) <= 20 ? '<span class="pill pill-amber">OK</span>' : '<span class="pill pill-blue">Daneben</span>') + '</td></tr>';
-    fcHtml += '<tr><td>WpK</td><td class="num">' + fmt(fc.wpk) + '</td><td class="num">' + fmt(wpkActual) + '</td><td class="num">' + (wpkDiff >= 0 ? '+' : '-') + fmt(Math.abs(wpkDiff)) + '</td><td>' + (Math.abs(wpkDiff) <= 150 ? '<span class="pill pill-green">Gut</span>' : Math.abs(wpkDiff) <= 300 ? '<span class="pill pill-amber">OK</span>' : '<span class="pill pill-blue">Daneben</span>') + '</td></tr>';
+    fcHtml += '<tr><td>Spend</td><td class="num">' + fmt(fc.spend) + '</td><td class="num">' + (hasSpend ? fmt(s.total_spend) : '–') + '</td><td class="num">' + (hasSpend ? (spendDiff >= 0 ? '+' : '') + fmt(Math.abs(spendDiff)) + ' (' + spendPct + '%)' : '–') + '</td><td>' + (!hasSpend ? '<span class="pill">n/a</span>' : Math.abs(spendPct) <= 10 ? '<span class="pill pill-green">Gut</span>' : Math.abs(spendPct) <= 20 ? '<span class="pill pill-amber">OK</span>' : '<span class="pill pill-blue">Daneben</span>') + '</td></tr>';
+    fcHtml += '<tr><td>WpK</td><td class="num">' + fmt(fc.wpk) + '</td><td class="num">' + (wpkActual != null ? fmt(wpkActual) : '–') + '</td><td class="num">' + (wpkDiff != null ? (wpkDiff >= 0 ? '+' : '-') + fmt(Math.abs(wpkDiff)) : '–') + '</td><td>' + (wpkDiff == null ? '<span class="pill">n/a</span>' : Math.abs(wpkDiff) <= 150 ? '<span class="pill pill-green">Gut</span>' : Math.abs(wpkDiff) <= 300 ? '<span class="pill pill-amber">OK</span>' : '<span class="pill pill-blue">Daneben</span>') + '</td></tr>';
     
     if (fc.revenue) {
       var revDiff = s.revenue - fc.revenue;
