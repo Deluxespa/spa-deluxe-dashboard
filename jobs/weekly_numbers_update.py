@@ -22,9 +22,10 @@ Kundendaten (Namen, Beträge, PLZ) landen NIE unverschlüsselt im Git-Repo.
 import json
 import sys
 from collections import defaultdict
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from typing import Optional
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -415,7 +416,7 @@ def build_hero_block(snap: dict, leads: Optional[dict], today: date) -> dict:
         "total_spend": total_spend,
         "spend_sources": spend_sources,
         "mer": mer,
-        "generated_at": today.isoformat(),
+        "generated_at": datetime.now(ZoneInfo("Europe/Berlin")).isoformat(),
     }
 
 

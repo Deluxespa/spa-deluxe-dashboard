@@ -141,6 +141,7 @@ canvas{max-height:240px}
     <div>
       <div style="font-size:11px;color:var(--text-muted);font-weight:500;">MER Tracking · Live <span id="heroStand"></span></div>
       <div style="font-size:18px;font-weight:600;color:var(--text-primary);margin-top:4px;letter-spacing:-0.2px;" id="heroMonthLabel">–</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Letzte Aktualisierung: <span id="heroLastUpdated">–</span></div>
     </div>
     <div style="text-align:right;">
       <div style="font-size:11px;color:var(--text-muted);font-weight:500;">MER</div>
@@ -1190,6 +1191,28 @@ function fmt(n) { return '€' + Math.round(n).toLocaleString('de-DE'); }
 
   el.textContent = (HERO.month_label || '–') +
     (HERO.day_of_month && HERO.days_in_month ? ' · Tag ' + HERO.day_of_month + '/' + HERO.days_in_month : '');
+
+  // "Letzte Aktualisierung": Zeitpunkt, zu dem HERO.generated_at im Job
+  // (jobs/weekly_numbers_update.py) erzeugt wurde (Europe/Berlin, ISO-8601
+  // mit Zeit). Aktualisiert sich automatisch, sobald die GitHub-Action das
+  // Dashboard neu baut - KEIN Live-Client-Timer wie headerClock.
+  var lastUpdatedEl = document.getElementById('heroLastUpdated');
+  if (lastUpdatedEl) {
+    if (HERO.generated_at) {
+      var genDate = new Date(HERO.generated_at);
+      if (!isNaN(genDate.getTime())) {
+        lastUpdatedEl.textContent = genDate.toLocaleDateString('de-DE', {
+          day: '2-digit', month: '2-digit', year: 'numeric'
+        }) + ', ' + genDate.toLocaleTimeString('de-DE', {
+          hour: '2-digit', minute: '2-digit'
+        }) + ' Uhr';
+      } else {
+        lastUpdatedEl.textContent = HERO.generated_at;
+      }
+    } else {
+      lastUpdatedEl.textContent = '–';
+    }
+  }
 
   document.getElementById('heroRevenueLabel').textContent = HERO.month_label ? 'Umsatz ' + HERO.month_label.split(' ')[0] : 'Umsatz';
   document.getElementById('heroRevenueValue').textContent = HERO.revenue != null ? fmt(HERO.revenue) : '–';
